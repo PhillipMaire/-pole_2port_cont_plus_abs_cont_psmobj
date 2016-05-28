@@ -151,7 +151,7 @@ switch action
         %%%psm below 
         next_row(y);
         NumeditParam(obj, 'abscent_pole_position', 180000, x, y, 'label', ...
-            '"abscent" position','TooltipString','out of range anterior trial.');        
+            '"abscent" lat position','TooltipString','out of range anterior trial.');        
         
         %%%psm above
 % 
