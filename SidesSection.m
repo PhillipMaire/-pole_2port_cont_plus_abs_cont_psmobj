@@ -93,9 +93,9 @@ function [x, y] = SidesSection(obj, action, x, y)
                 '3', x, y);
       next_row(y);
       % Prob of choosing left as correct side
-      NumeditParam(obj, 'LeftPortProb', 0.3, x, y); 
+      NumeditParam(obj, 'LeftPortProb', 0.4, x, y); 
       next_row(y, 1);
-      NumeditParam(obj, 'RightPortProb', 0.3, x, y); 
+      NumeditParam(obj, 'RightPortProb', 0.4, x, y); 
       next_row(y, 1);
 %have to set so that 
 %if RightPortProb(1)+LeftPortProb(1)+OutReachProb(1)~=1
@@ -126,14 +126,14 @@ function [x, y] = SidesSection(obj, action, x, y)
     case 'choose_next_side', % --------- CASE CHOOSE_NEXT_SIDE -----
 %called on by the primary program (with the same name as the @folder in the
 %protocols -psm 
-      % 108/l : nogo ; 114/r: go         111/o 
+      % 108/l : nogo ; 114/r: go         97/a
       %these are the just l and r's respective ASCII valies
       %ie char(114)==double('r'); char(108)==double('l'); char(111)==double('o');-psm 
       % --- autotrain mode is key to deciding what to do ...
       pickAtRandom = 0; % if 1, will simply use leftPortProb
       lpp = value(LeftPortProb); % this is changed by probabalistic autotrainer
       rpp = value(RightPortProb);
-      oorp=1-rpp-lpp;
+      absp=1-rpp-lpp;
       ntbc = value (NumTrialsBiasCalc);
       
       switch lower(value(AutoTrainMode))
@@ -293,8 +293,7 @@ function [x, y] = SidesSection(obj, action, x, y)
               %consecutive if statemnts-psm
               if randVar<=lpp, next_side = 'l'; 
                elseif randVar>lpp && randVar<=lpp+rpp, next_side = 'r'; %psm
-               else next_side = 'o' %psm%#change 'r' back to 'o'
-             %psm else next_side = 'r'; 
+               else next_side = 'a' %psm%
              end;
              %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
           else 
@@ -305,14 +304,14 @@ function [x, y] = SidesSection(obj, action, x, y)
                 if previous_sides(n_started_trials)=='l' 
                     %%%%%-psm takes care of max same by choosing one of the other 
                     %two variables based on their relitive probabilities 
-                     if rand(1)<=rpp/(rpp+oorp), next_side = 'r'; 
-                     else next_side = 'o';%#change to 'o'
+                     if rand(1)<=rpp/(rpp+absp), next_side = 'r'; 
+                     else next_side = 'a';
                      end
                 elseif previous_sides(n_started_trials)=='r' 
-                     if rand(1)<=lpp/(lpp+oorp), next_side = 'l'; 
-                     else next_side = 'o';%#change to 'o'
+                     if rand(1)<=lpp/(lpp+absp), next_side = 'l'; 
+                     else next_side = 'a';
                      end
-                elseif previous_sides(n_started_trials)=='o' %#change to 'o'
+                elseif previous_sides(n_started_trials)=='a' 
                      if rand(1)<=lpp/(lpp+rpp), next_side = 'l'; 
                      else next_side = 'r';
                      end
@@ -322,7 +321,7 @@ function [x, y] = SidesSection(obj, action, x, y)
                 randVar=rand(1);
                 if randVar<=lpp, next_side = 'l'; 
                   elseif randVar>lpp && randVar<=lpp+rpp, next_side = 'r'; %psm
-                  else next_side = 'o' %#change 'r' back to 'o'
+                  else next_side = 'a' 
                 end;
              end;
           end;

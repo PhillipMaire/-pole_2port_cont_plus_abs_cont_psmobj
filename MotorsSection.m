@@ -150,12 +150,9 @@ switch action
             '"Yes" pos position','TooltipString','Near yes trial position in microsteps.');
         %%%psm below 
         next_row(y);
-        NumeditParam(obj, 'oor_pole_position_ant', 300000, x, y, 'label', ...
-            '"out" ant position','TooltipString','out of range anterior trial.');        
+        NumeditParam(obj, 'abscent_pole_position_ant', 300000, x, y, 'label', ...
+            '"abscent" ant position','TooltipString','out of range anterior trial.');        
         
-        next_row(y);
-        NumeditParam(obj, 'oor_pole_position_pos', 0, x, y, 'label', ...
-            '"out" pos position','TooltipString','out of range posterior trial.');
         %%%psm above
 % 
 %         next_row(y);
@@ -204,10 +201,10 @@ switch action
                 next_pole_position = value(round(rand*(yes_pole_position_ant - yes_pole_position_pos)+yes_pole_position_pos));
             elseif next_side == 'l'
                 next_pole_position = value(round(rand*(no_pole_position_ant - no_pole_position_pos)+no_pole_position_pos));
-            elseif next_side == 'o'%-psm
+            elseif next_side == 'a'%-psm
                 if rand(1)>=.5
-                next_pole_position = value(oor_pole_position_ant);
-                else  next_pole_position = value(oor_pole_position_pos);
+                next_pole_position = value(abscent_pole_position_ant);
+                else  next_pole_position = value(abscent_pole_position_ant);
                 end%-psm
             else
                 error('un-recognized type for next_side');
