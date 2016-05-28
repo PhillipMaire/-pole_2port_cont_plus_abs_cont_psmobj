@@ -150,8 +150,8 @@ switch action
             '"Yes" pos position','TooltipString','Near yes trial position in microsteps.');
         %%%psm below 
         next_row(y);
-        NumeditParam(obj, 'abscent_pole_position_ant', 300000, x, y, 'label', ...
-            '"abscent" ant position','TooltipString','out of range anterior trial.');        
+        NumeditParam(obj, 'abscent_pole_position', 180000, x, y, 'label', ...
+            '"abscent" position','TooltipString','out of range anterior trial.');        
         
         %%%psm above
 % 
@@ -202,22 +202,34 @@ switch action
             elseif next_side == 'l'
                 next_pole_position = value(round(rand*(no_pole_position_ant - no_pole_position_pos)+no_pole_position_pos));
             elseif next_side == 'a'%-psm
-                if rand(1)>=.5
-                next_pole_position = value(abscent_pole_position_ant);
-                else  next_pole_position = value(abscent_pole_position_ant);
-                end%-psm
-            else
+                if rand(1)>=.5; %chooses randomly which pole position to mimic, note that the probabilites are 
+                    %not dependent on the probabilities of left port or right port. but just random
+                next_pole_position = value(round(rand*(yes_pole_position_ant - yes_pole_position_pos)+yes_pole_position_pos));
+                else
+                next_pole_position = value(round(rand*(no_pole_position_ant - no_pole_position_pos)+no_pole_position_pos)); 
+                end
+                else%psm
                 error('un-recognized type for next_side');
             end
 
-            half_point = round(value(no_pole_position_pos+yes_pole_position_ant)/2);
+            half_point = round(value(no_pole_position_pos+yes_pole_position_ant)/2);%#
 
-   
-                
-        
+            if  next_side == 'a'%-psm
+                %we havce to ahve something that knows the set lateral position  lateral_motor_position
+        position = value(abscent_pole_position);%set position to lateral position for the abscent trial
         tic
+        move_absolute(motors,position,value(lateral_motor_num));
         move_absolute_sequence(motors,{half_point,next_pole_position},value(motor_num));
         movetime = toc
+            else
+        position = value(lateral_motor_position);
+        %this movetime below is dependent on the lateral movement as well
+        %which is set for absolute movement which needs to be corrected later
+        tic 
+        move_absolute(motors,position,value(lateral_motor_num));
+        move_absolute_sequence(motors,{half_point,next_pole_position},value(motor_num));
+        movetime = toc
+            end
         if movetime<value(motor_move_time) % Should make this min-ITI a SoloParamHandle
             pause( value(motor_move_time)-movetime);
         end
