@@ -128,7 +128,7 @@ function [x, y] = SidesSection(obj, action, x, y)
 %protocols -psm 
       % 108/l : nogo ; 114/r: go         97/a
       %these are the just l and r's respective ASCII valies
-      %ie char(114)==double('r'); char(108)==double('l'); char(111)==double('o');-psm 
+      %ie char(114)==double('r'); char(108)==double('l'); char(97)==double('a');-psm 
       % --- autotrain mode is key to deciding what to do ...
       pickAtRandom = 0; % if 1, will simply use leftPortProb
       lpp = value(LeftPortProb); % this is changed by probabalistic autotrainer
