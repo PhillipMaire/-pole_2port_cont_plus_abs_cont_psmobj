@@ -279,7 +279,7 @@ switch action
            numbits = 10; %2^10=1024 possible trial nums
            
            
-           x = double(dec2binvec(trialnum)');
+           x = double(dec2binvec(trialnum)');%Convert decimal value to binary vector
            if length(x) < numbits
                x = [x; repmat(0, [numbits-length(x) 1])];
            end
