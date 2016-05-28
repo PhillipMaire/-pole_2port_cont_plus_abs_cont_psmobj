@@ -108,11 +108,13 @@ function [x, y] = SidesSection(obj, action, x, y)
       pos = get(gcf, 'Position');
       SoloParamHandle(obj, 'myaxes', 'saveable', 0, 'value', axes);
       set(value(myaxes), 'Units', 'pixels');
-      set(value(myaxes), 'Position', [90 pos(4)-140 pos(3)-130 100]);
-      set(value(myaxes), 'YTick', [1 2], 'YLim', [0.5 2.5], 'YTickLabel', ...
-                        {'Right', 'Left'});
+      set(value(myaxes), 'Position', [90 pos(4)-110 pos(3)-130 90]);
+      set(value(myaxes), 'YTick', [1 1.5 2], 'YLim', [0.5 2.5], 'YTickLabel', ...
+                        {'abscent', 'Right', 'Left'});%psm depending on what we want 
+                    %I might have to chnage this to abscent right and left or at lease 
+                    %change the symbols for these so that we can distinguish them.
       NumeditParam(obj, 'ntrials', 100, x, y, ...
-                   'position', [5 pos(4)-100 40 40], 'labelpos', 'top', ...
+                   'position', [5 pos(4)-75 40 40], 'labelpos', 'top', ...
                    'TooltipString', 'How many trials to show in plot');
       set_callback(ntrials, {mfilename, 'update_plot'});      
       xlabel('trial number');
@@ -359,13 +361,17 @@ function [x, y] = SidesSection(obj, action, x, y)
       ps = value(previous_sides);
       if ps(end)=='l', 
          hb = line(length(previous_sides), 2, 'Parent', value(myaxes));
-      else                         
+      elseif ps(end)=='r',                          
+         hb = line(length(previous_sides), 1.5, 'Parent', value(myaxes));
+      else %for abscent condition ps(end)=='a'    
          hb = line(length(previous_sides), 1, 'Parent', value(myaxes));
       end;
       set(hb, 'Color', 'b', 'Marker', '.', 'LineStyle', 'none');
       
-      % GEREN markers for correct
-      xgreen = find(hit_history == 1);
+      % GREEN markers for correct
+      xgreen = find(hit_history == 1);%#left off here tryng to figure out where 
+      %hit_history is defined so i can insert the correct rejections and plot correctly
+      %currently plots are off axes!!!#######
       lefts  = find(previous_sides(xgreen) == 'l');
       rghts  = find(previous_sides(xgreen) == 'r');
       ygreen = zeros(size(xgreen)); ygreen(lefts) = 2; ygreen(rghts) = 1;
