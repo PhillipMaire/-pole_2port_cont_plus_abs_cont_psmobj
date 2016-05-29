@@ -281,7 +281,8 @@ switch action
            
            x = double(dec2binvec(trialnum)');%Convert decimal value to binary vector
            if length(x) < numbits
-               x = [x; repmat(0, [numbits-length(x) 1])];
+               x = [x; repmat(0, [numbits-length(x) 1])];%builds 0's on x so that it is 
+               %the proper size for the bit code
            end
            % x is now 10-bit vector giving trial num, LSB first (at top).
            x(x==1) = slid;
