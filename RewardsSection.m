@@ -19,7 +19,8 @@
 %           {'statename_list', 'all'}, {'parse_pokes', false});
       
       % Take the current raw events and push them into the history:
-      push_history(LastTrialEvents); LastTrialEvents.value = [];
+      push_history(LastTrialEvents);
+      LastTrialEvents.value = [];
       
       if rows(pstruct.punish)>0 
           hit = 0;
