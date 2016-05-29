@@ -86,7 +86,7 @@ switch action
         
         % ---  Make new window for motor configuration
         SoloParamHandle(obj, 'motorfig', 'saveable', 0);
-        motorfig.value = figure('Position', [3 800 400 200], 'Menubar', 'none',...
+        motorfig.value = figure('Position', [3 800 410 245], 'Menubar', 'none',...
             'Toolbar', 'none','Name','Motor Control','NumberTitle','off');
 
         x = 1; y = 1;

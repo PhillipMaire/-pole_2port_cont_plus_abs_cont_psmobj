@@ -81,6 +81,9 @@ SoloParamHandle(obj, 'lickport_position_history', 'value', []);
 % History of left port probabilities, AFTER bias correction
 SoloParamHandle(obj, 'left_port_prob_history', 'value', []);
 
+% History of right port probabilities, not yet adjusted to work with bias correction-psm
+SoloParamHandle(obj, 'right_port_prob_history', 'value', []);
+
 % Position of poles for each trial:%%% I DONT USE THIS-SP
 npos=5; SoloParamHandle(obj, 'pole_position_list', 'value', cell(npos,1));
 

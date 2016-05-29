@@ -250,7 +250,24 @@ switch action
                sRCol    sRCol    sRCol    sRCol    sPoTP    rcoll_t   pvid          0; ... % give animal time to collect reward              
                sRDel    sRDel    sRDel    sRDel    sPrAP    0.001     0          0; ... % restart delay              
                ];
-
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%-psm           
+%            stm = [stm ;
+%                %LinSt   LoutSt   RinSt    RoutSt   TimeupSt Time      Dou      Aou  (Dou is bitmask format)
+%                % line b (sBC = b)
+%                sBC      sBC      sBC      sBC      101      .01       etid       0; ... % send bitcode
+%                sPrTP    sPrTP    sPrTP    sPrTP    sPMS     prep_t    0          0; ... % pretrial pause %Possibly sPMS -> sAns
+%                onLickS  onLickS  onLickS  onLickS  sPrAP    pr_t+sp_t pvid       0; ... % Preanswer Pause
+%                onlickL  onlickL  onlickR  onlickR  sLoMi    ap_t      pvid          0; ... % Check if correct lick
+%                sLoMi    sLoMi    sLoMi    sLoMi    sPoTP    0.001     0          0; ... % log miss/ignore
+%                sPoTP    sPoTP    sPoTP    sPoTP    35       postp_t   0          0; ... % posttrial pause
+%                sPun     sPun     sPun     sPun     pps      eto_t     pvid          0; ... % punish
+%                sRwL     sRwL     sRwL     sRwL     sRCol    water_t   pvid+wvLid      0; ... % reward left
+%                sRwR     sRwR     sRwR     sRwR     sRCol    water_t   pvid+wvRid      0; ... % reward right                      
+%                sRCaT    sRCaT    sRCaT    sRCaT    sPoTP    0.001     pvid          0; ... % to log unrewarded correct trials              
+%                sRCol    sRCol    sRCol    sRCol    sPoTP    rcoll_t   pvid          0; ... % give animal time to collect reward              
+%                sRDel    sRDel    sRDel    sRDel    sPrAP    0.001     0          0; ... % restart delay              
+%                ];
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%-psm
            %------ Signal trial number on digital output given by 'slid':
            % Requires that states 101 through 101+2*numbits be reserved
            % for giving bit signal.
@@ -262,9 +279,11 @@ switch action
            numbits = 10; %2^10=1024 possible trial nums
            
            
-           x = double(dec2binvec(trialnum)');
+           x = double(dec2binvec(trialnum)');%Convert decimal value to binary vector
            if length(x) < numbits
                x = [x; repmat(0, [numbits-length(x) 1])];
+               %builds 0's on x so that it is 
+               %the proper size for the bit code
            end
            % x is now 10-bit vector giving trial num, LSB first (at top).
            x(x==1) = slid;
