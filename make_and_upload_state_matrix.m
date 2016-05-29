@@ -77,9 +77,9 @@ switch action
       
       
    % program starts in state 40
-   stm = [0 0 0 0 40 0.01  0 0];
-   stm = [stm ; zeros(40-rows(stm), 8)];
-   stm(36,:) = [35 35 35 35 35 1   0 0];
+   stm = [0 0 0 0 40 0.01  0 0];%stm is first defined here
+   stm = [stm ; zeros(40-rows(stm), 8)];%this just makes stm 40 rows and 8 columns
+   stm(36,:) = [35 35 35 35 35 1   0 0];%obviously just edits column 36 (all rows) 
    b = rows(stm); 
    
 % Alexis 9-3-14 MUST BE RENAMED BASED ON 2-PORT DISCRIM TO MAKE SURE HITS
@@ -108,7 +108,9 @@ switch action
    RealTimeStates.withdraw_lickport_preans = b+16;%15;
    RealTimeStates.present_lickport = b+17;%16;
    RealTimeStates.restart_delay = b+11;%17;   
-   
+   %psm below 
+%testingpsm   RealTimeStates.correct_rejection = b+18; 
+   %psm above 
    next_side = SidesSection(obj, 'get_next_side');
    
    % ----------------------------------------------------------------------
@@ -143,13 +145,15 @@ switch action
            sPMS = b+2; % pole move & sample period
            sPrAP = b+3; % preanswer pause
            sLoMi = b+4; % log miss/ignore
+           sLoCR = b+18; %testingpsm %log correct rejection
            sPoTP = b+5; % posttrial pause
            sPun = b+6; % punish (be it airpuff, timeout, or whatev)  
            sRwL = b+7; % reward left
            sRwR = b+8; % reward right
            sRCaT = b+9;%12; % to log unrewarded correct trals (catch)
            sRCol = b+10;%13; % give animal time to collect reward         
-           sRDel = b+11;%17 ; % restart delay         
+           sRDel = b+11;%17 ; % restart delay   
+           
            
            % ---- assign gui variables
            ap_t = value(AnswerPeriodTime);
@@ -202,7 +206,7 @@ switch action
                 % Alexis 9-2-14 DECLARE A WRONG
                 pps = sPoTP; % post-punish state default is post trial pause
 
-           onLickS = sPMS;
+           onLickS = sPMS;%helps define if there is lick during the sample period.
 
            % Adjust extra time out basd on airpuf tmie
            eto_t = eto_t - puff_t;
@@ -216,7 +220,7 @@ switch action
                onlickR = sPun; % punish
                onlickL = sRwL; % water to left port
                water_t = LWaterValveTime; % Defined in ValvesSection.m. 
-           else next_side=='a' %for out of reach condition -psm
+           else next_side=='a' %for abscent condition -psm
                 onlickL = sPun;
                 onlickR = sPun;
                 water_t = 0;

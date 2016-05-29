@@ -38,9 +38,9 @@
 %
 
 function [x, y] = SidesSection(obj, action, x, y)
-   
+   global next_side %made 'next_side' global!!!-psm
    GetSoloFunctionArgs;
-   
+  
    switch action
     
     case 'init',   % ------------ CASE INIT ----------------
@@ -295,8 +295,9 @@ function [x, y] = SidesSection(obj, action, x, y)
               %consecutive if statemnts-psm
               if randVar<=lpp, next_side = 'l'; 
                elseif randVar>lpp && randVar<=lpp+rpp, next_side = 'r'; %psm
-               else next_side = 'a' %psm%
+               else next_side = 'a'; %psm%
              end;
+           next_side_for_hit_sorting=next_side;%-psm ####just for test stage
              %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
           else 
              % MaxSame applies, check for its rules:
@@ -329,7 +330,7 @@ function [x, y] = SidesSection(obj, action, x, y)
           end;
        end
 
-      
+
     %  session_type = SessionTypeSection(obj,'get_session_type'); 
       switch SessionType
           
@@ -340,7 +341,7 @@ function [x, y] = SidesSection(obj, action, x, y)
       % logging globals (also used sometmies)
       previous_sides(n_started_trials+1) = next_side;
      
-      lpph = left_port_prob_history(:);
+      lpph = left_port_prob_history(:);%need this for right port prob too -psm 
       lpph(n_started_trials+1) = lpp;
       if (size(lpph,1) == 1) ; lpph = lpph'; end
       left_port_prob_history.value = [lpph];
@@ -369,20 +370,25 @@ function [x, y] = SidesSection(obj, action, x, y)
       set(hb, 'Color', 'b', 'Marker', '.', 'LineStyle', 'none');
       
       % GREEN markers for correct
-      xgreen = find(hit_history == 1);%#left off here tryng to figure out where 
-      %hit_history is defined so i can insert the correct rejections and plot correctly
-      %currently plots are off axes!!!#######
-      lefts  = find(previous_sides(xgreen) == 'l');
-      rghts  = find(previous_sides(xgreen) == 'r');
-      ygreen = zeros(size(xgreen)); ygreen(lefts) = 2; ygreen(rghts) = 1;
+      xgreen   = find(hit_history == 1|hit_history==2);%2's are for the correct rejections of abscent trials-psm
+      lefts    = find(previous_sides(xgreen) == 'l');
+      rghts    = find(previous_sides(xgreen) == 'r');
+      abscents =find(previous_sides(xgreen) == 'a');
+      
+      
+      ygreen = zeros(size(xgreen)); ygreen(lefts) = 2; 
+      ygreen(rghts) = 1.5; ygreen(abscents) = 1; 
+      
       hg = line(xgreen, ygreen, 'Parent', value(myaxes));
       set(hg, 'Color', 'g', 'Marker', '.', 'LineStyle', 'none'); 
  
       % RED markers for incorrect
-      xred  = find(hit_history == 0);
-      lefts = find(previous_sides(xred) == 'l');
-      rghts = find(previous_sides(xred) == 'r');
-      yred = zeros(size(xred)); yred(lefts) = 2; yred(rghts) = 1;
+      xred     = find(hit_history == 0);
+      lefts    = find(previous_sides(xred) == 'l');
+      rghts    = find(previous_sides(xred) == 'r');
+      abscents = find(previous_sides(xred) == 'a');
+      yred = zeros(size(xred)); yred(lefts) = 2; 
+      yred(rghts) = 1.5;  yred(abscents) = 1;
       hr = line(xred, yred, 'Parent', value(myaxes));
       set(hr, 'Color', 'r', 'Marker', '.', 'LineStyle', 'none'); 
       
@@ -390,7 +396,7 @@ function [x, y] = SidesSection(obj, action, x, y)
       xblack  = find(hit_history == -1);
       lefts = find(previous_sides(xblack) == 'l');
       rghts = find(previous_sides(xblack) == 'r');
-      yblack = zeros(size(xblack)); yblack(lefts) = 2; yblack(rghts) = 1;
+      yblack = zeros(size(xblack)); yblack(lefts) = 2; yblack(rghts) = 1.5;
       hk = line(xblack, yblack, 'Parent', value(myaxes));
       set(hk, 'Color', 'k', 'Marker', 'x', 'LineStyle', 'none'); 
 
@@ -464,5 +470,5 @@ function [x, y] = SidesSection(obj, action, x, y)
       figure(currfig);      
    end;
 
-   
+  
       
