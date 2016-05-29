@@ -1,5 +1,5 @@
  function [] = RewardsSection(obj, action)
-   
+   global next_side %made 'next_side' global!!!-psm
    GetSoloFunctionArgs;
    
    switch action
@@ -23,8 +23,16 @@
       
       if rows(pstruct.punish)>0 
           hit = 0;
-      elseif rows(pstruct.miss)>0 
+          %this will work fine for the trial 'a' condition, just have to plot based on 
+          %lick port and trial type, trial type 'a' then lick of wither port is an error
+          %thus plot red and also distingish L or R port.
+      elseif rows(pstruct.miss)>0 %miss just means mouse didn't lick, thats it 
+          %so for abscent correct rejection, must define this based on the trial type. 
+          if next_side=='a'
+              hit = 2; %inicating a correct rejection-psm
+          else
           hit = -1;
+          end
       else
           hit = 1;
       end
