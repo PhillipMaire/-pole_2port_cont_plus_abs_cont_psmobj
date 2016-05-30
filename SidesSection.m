@@ -297,7 +297,6 @@ function [x, y] = SidesSection(obj, action, x, y)
                elseif randVar>lpp && randVar<=lpp+rpp, next_side = 'r'; %psm
                else next_side = 'a'; %psm%
              end;
-           next_side_for_hit_sorting=next_side;%-psm ####just for test stage
              %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
           else 
              % MaxSame applies, check for its rules:
