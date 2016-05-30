@@ -343,7 +343,7 @@ function [x, y] = SidesSection(obj, action, x, y)
       lpph = left_port_prob_history(:);%need this for right port prob too -psm 
       lpph(n_started_trials+1) = lpp;
       if (size(lpph,1) == 1) ; lpph = lpph'; end
-      left_port_prob_history.value = [lpph];
+      left_port_prob_history.value = [lpph]
       
     case 'get_next_side',   % --------- CASE GET_NEXT_SIDE ------
       if isempty(previous_sides),
