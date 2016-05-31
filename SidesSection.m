@@ -340,7 +340,12 @@ function [x, y] = SidesSection(obj, action, x, y)
       % logging globals (also used sometmies)
       previous_sides(n_started_trials+1) = next_side;
      
-      lpph = left_port_prob_history(:);%need this for right port prob too -psm 
+      %I didn't update this because lpph or any of its related variabels don't
+      %seem to be saved, for example the lpph variable is a vector of 0's 
+      %with the exception of its last added number which is the current lpp
+      %value. at this point I see no need to change any of this for right
+      %port. -psm 
+      lpph = left_port_prob_history(:);
       lpph(n_started_trials+1) = lpp;
       if (size(lpph,1) == 1) ; lpph = lpph'; end
       left_port_prob_history.value = [lpph];
