@@ -252,7 +252,7 @@ function [x, y] = SidesSection(obj, action, x, y)
               nTrials = ntbc; % how many per side to use
               
               rT = find(previous_sides == 'r');
-              lT = find(previous_sides == 'l');            
+              lT = find(previous_sides == 'l'); 
               
               % determince frac correct for last nTrials each side
               if (length(rT) >= nTrials & length(lT) >= nTrials)
