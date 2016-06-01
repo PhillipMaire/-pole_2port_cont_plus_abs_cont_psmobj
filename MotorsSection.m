@@ -150,8 +150,8 @@ switch action
             '"Yes" pos position','TooltipString','Near yes trial position in microsteps.');
         %%%psm below 
         next_row(y);
-        NumeditParam(obj, 'abscent_pole_position', 180000, x, y, 'label', ...
-            '"abscent" lat position','TooltipString','out of range anterior trial.');        
+        NumeditParam(obj, 'Absent_pole_position', 180000, x, y, 'label', ...
+            '"Absent" lat position','TooltipString','out of range anterior trial.');        
         
         %%%psm above
 % 
@@ -216,7 +216,7 @@ switch action
 
             if  next_side == 'a'%-psm
                 %we havce to ahve something that knows the set lateral position  lateral_motor_position
-        position = value(abscent_pole_position);%set position to lateral position for the abscent trial
+        position = value(Absent_pole_position);%set position to lateral position for the absent trial
         tic
         move_absolute(motors,position,value(lateral_motor_num));
         move_absolute_sequence(motors,{half_point,next_pole_position},value(motor_num));

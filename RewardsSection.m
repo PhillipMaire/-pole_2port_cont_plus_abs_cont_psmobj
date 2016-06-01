@@ -28,7 +28,7 @@
           %lick port and trial type, trial type 'a' then lick of wither port is an error
           %thus plot red and also distingish L or R port.
       elseif rows(pstruct.miss)>0 %miss just means mouse didn't lick, thats it. 
-          %So for abscent correct rejection, must define this based on the trial type. 
+          %So for absent correct rejection, must define this based on the trial type. 
           if next_side=='a'
               hit = 2; %inicating a correct rejection-psm
           else
