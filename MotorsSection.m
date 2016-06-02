@@ -212,22 +212,26 @@ switch action
                 error('un-recognized type for next_side');
             end
 
-            half_point = round(value(no_pole_position_pos+yes_pole_position_ant)/2);%#
-
+            half_point     = round(value(no_pole_position_pos+yes_pole_position_ant)/2);%#
+            half_point_lat = round(value(lateral_motor_position+Absent_pole_position)/2);%#
             if  next_side == 'a'%-psm
                 %we havce to ahve something that knows the set lateral position  lateral_motor_position
-        position = value(Absent_pole_position);%set position to lateral position for the absent trial
+        absent_position = value(Absent_pole_position);%set position to lateral position for the absent trial
         tic
-        move_absolute(motors,position,value(lateral_motor_num));
+        %move_absolute(motors,half_point_lat,value(lateral_motor_num));
         move_absolute_sequence(motors,{half_point,next_pole_position},value(motor_num));
+        %move_absolute_sequence(motors,{half_point_lat,absent_position},value(lateral_motor_num));
+        %move_absolute(motors,absent_position,value(lateral_motor_num));
         movetime = toc
             else
-        position = value(lateral_motor_position);
+        absent_position = value(lateral_motor_position);
         %this movetime below is dependent on the lateral movement as well
         %which is set for absolute movement which needs to be corrected later
         tic 
-        move_absolute(motors,position,value(lateral_motor_num));
+        %move_absolute(motors,half_point_lat,value(lateral_motor_num));
         move_absolute_sequence(motors,{half_point,next_pole_position},value(motor_num));
+        %move_absolute_sequence(motors,{half_point_lat,absent_position},value(lateral_motor_num));
+        %move_absolute(motors,absent_position,value(lateral_motor_num));
         movetime = toc
             end
         if movetime<value(motor_move_time) % Should make this min-ITI a SoloParamHandle
