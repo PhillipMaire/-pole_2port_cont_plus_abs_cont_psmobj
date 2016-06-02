@@ -292,7 +292,7 @@ function [x, y] = SidesSection(obj, action, x, y)
               end
       end
       
-      %%%%%%%%%%%%%%%end of autotrainer switch%%%%%%%%%%%%%%%%
+      %%%%%%%%%%%%%%%END OF AUTOTRAINER SWITCH%%%%%%%%%%%%%%%%
       
       % --- if you are to simply pick at random ...
       %pickAtRandom is set to 1 when  autotrainer is off (or using probabalistic autotrainer
