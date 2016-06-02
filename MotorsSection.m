@@ -215,13 +215,14 @@ switch action
 
             half_point     = round(value(no_pole_position_pos+yes_pole_position_ant)/2);
             half_point_lat = round(value(lateral_motor_position+Absent_pole_position)/2);%-psm
+            motor_number_seq = [1,1,2,2];%%######
             if  next_side == 'a'%-psm
                 %we havce to ahve something that knows the set lateral position  lateral_motor_position
         lateral_position = value(Absent_pole_position);%set position to lateral position for the absent trial
         tic
         %move_absolute(motors,lateral_position,value(lateral_motor_num));
         %move_absolute_sequence(motors,{half_point_lat,lateral_position},value(lateral_motor_num));
-        move_absolute_sequence2(motors,{half_point,next_pole_position,half_point_lat,lateral_position},(1,1,2,2));%value(motor_num));
+        move_absolute_sequence2(motors,{half_point,next_pole_position,half_point_lat,lateral_position},motor_number_seq);%value(motor_num));
         movetime = toc
             else
         lateral_position = value(lateral_motor_position);
@@ -230,7 +231,7 @@ switch action
         tic 
         %move_absolute(motors,lateral_position,value(lateral_motor_num));
         %move_absolute_sequence(motors,{half_point_lat,lateral_position},value(lateral_motor_num));
-        move_absolute_sequence2(motors,{half_point,next_pole_position,half_point_lat,lateral_position},(1,1,2,2));%value(motor_num));
+        move_absolute_sequence2(motors,{half_point,next_pole_position,half_point_lat,lateral_position},motor_number_seq);%value(motor_num));
         movetime = toc
             end
         if movetime<value(motor_move_time) % Should make this min-ITI a SoloParamHandle
