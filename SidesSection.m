@@ -265,29 +265,49 @@ function [x, y] = SidesSection(obj, action, x, y)
           case 'probabalistic'
               pickAtRandom = 1; % use it, but tweak it
               nTrials = ntbc; % how many per side to use
+              %nTrials value is defined by 'NumTrialsBiasCalc'-psm
               
               rT = find(previous_sides == 'r');
               lT = find(previous_sides == 'l'); 
+             
               
-              % determince frac correct for last nTrials each side
-              if (length(rT) >= nTrials & length(lT) >= nTrials)
+              %make sure there are enough trials first. -psm 
+              if (length(rT) >= nTrials && length(lT) >= nTrials)
+                  %all lick trials
                   valL = find(hit_history(lT) >= 0);
                   valR = find(hit_history(rT) >= 0);
                   
                   % enuff VALID trials per side? i.e. with lick
-                  if (length(valL) >= nTrials & length(valR) >= nTrials)
+                  if (length(valL) >= nTrials && length(valR) >= nTrials)
                       % restrict to nTrials
                       valL = valL(end-nTrials+1:end);
                       valR = valR(end-nTrials+1:end);
-                      
                       % compute frac correct
+                      %lT(valL) are all coorect or lick trials with  in the
+                      %designated trial window set by prob autotrianer
+                      %(default is 10). 
                       fL = sum(hit_history(lT(valL)))/length(valL);
                       fR = sum(hit_history(rT(valR)))/length(valR);
+                     
+                      %the way the autotrainer is set up is dependent only
+                      %on miss trials, which don't exist for A (abscent)
+                      %trials. so no need for abscent trials.-psm
+                      %wrong, actually it looks at just licks so you do
+                      %have to incorporate licks abs position in these, it
+                      %would be best to keep the bottom the same and create
+                      %a separate probabalistic trainer for combined
+                      %abscent and R L conditions
                       
                       % bias
                       lpp = lpp - ((fL - fR)/2);
+                      rpp = rpp - ((fR - fL)/2);
                       disp(['Using left probabiliy: ' num2str(lpp)]);
-                      if (lpp < 0) ; lpp = 0; elseif (lpp > 1) ; lpp = 1 ; end
+                      disp(['Using right probabiliy: ' num2str(rpp)]);
+                      if (lpp < 0) ; lpp = 0; elseif (lpp > 1-absp) ; lpp = 1-absp ; end
+                      if (rpp < 0) ; rpp = 0; elseif (rpp > 1-absp) ; rpp = 1-absp ; end
+                      absp
+                      lpp
+                      rpp
                   end
               end
       end
