@@ -269,19 +269,22 @@ function [x, y] = SidesSection(obj, action, x, y)
               
               rT = find(previous_sides == 'r');
               lT = find(previous_sides == 'l'); 
+              aT = find(previous_sides == 'a'); 
              
               
               %make sure there are enough trials first. -psm 
-              if (length(rT) >= nTrials && length(lT) >= nTrials)
-                  %all lick trials
+              if (length(rT) >= nTrials && length(lT) >= nTrials && length(aT) >= nTrials)
+                  %all correct and missed trials (becasue we only want to
+                  %update based on incorrect trials)
                   valL = find(hit_history(lT) >= 0);
                   valR = find(hit_history(rT) >= 0);
+                  valA = find(hit_history(aT) == 2);
+                  %==2 represents correct rejection on the absent trials.
+                  %miss conditions don't exist for absent trials so just
+                  %need to record correct trials. 
                   
                   % enuff VALID trials per side? i.e. with lick
-                  if (length(valL) >= nTrials && length(valR) >= nTrials)
-                      % restrict to nTrials
-                      valL = valL(end-nTrials+1:end);
-                      valR = valR(end-nTrials+1:end);
+                  i 
                       % compute frac correct
                       %lT(valL) are all coorect or lick trials with  in the
                       %designated trial window set by prob autotrianer
@@ -304,11 +307,7 @@ function [x, y] = SidesSection(obj, action, x, y)
                       disp(['Using left probabiliy: ' num2str(lpp)]);
                       disp(['Using right probabiliy: ' num2str(rpp)]);
                       if (lpp < 0) ; lpp = 0; elseif (lpp > 1-absp) ; lpp = 1-absp ; end
-                      if (rpp < 0) ; rpp = 0; elseif (rpp > 1-absp) ; rpp = 1-absp ; end
-                      lpp
-                      rpp
-                      absp
-                  end
+                      if (rpp < 0) ; rpp = 0; elseif (rpp > 1-absp) ; rpp = 1-absp ; end end
               end
       end
       
