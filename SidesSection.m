@@ -249,30 +249,36 @@ function [x, y] = SidesSection(obj, action, x, y)
           % also note that must have 10 trials PER SIDE for this to work.
           case 'probabalistic'
               pickAtRandom = 1; % use it, but tweak it
-              nTrials = ntbc; % how many per side to use
+              nTrials = ntbc; 
               %nTrials value is defined by 'NumTrialsBiasCalc'-psm
               
               rT = find(previous_sides == 'r');
               lT = find(previous_sides == 'l'); 
-             
+              aT = find(previous_sides == 'a'); 
               
               %make sure there are enough trials first. -psm 
-              if (length(rT) >= nTrials && length(lT) >= nTrials)
-                  %all lick trials
+              if (length(rT) >= nTrials && length(lT) >= nTrials && length(aT) >= nTrials)
+                  %correct trials (==1) and no lick trials (==0) for R and
+                  %L 
                   valL = find(hit_history(lT) >= 0);
                   valR = find(hit_history(rT) >= 0);
+                  valA = find(hit_history(aT) == 2);%only two conditions for 
+                  %absent trials, lick or no lick. counting the no lick ie
+                  %correct rejections. no 'miss' trials here so ignore ==0
                   
                   % enuff VALID trials per side? i.e. with lick
-                  if (length(valL) >= nTrials && length(valR) >= nTrials)
+                  if (length(valL) >= nTrials && length(valR) >= nTrials && length(valA) >= nTrials)
                       % restrict to nTrials
                       valL = valL(end-nTrials+1:end);
                       valR = valR(end-nTrials+1:end);
-                      % compute frac correct
+                      valA = valA(end-nTrials+1:end);
+                      % compute frac correct and no
                       %lT(valL) are all coorect or lick trials with  in the
                       %designated trial window set by prob autotrianer
                       %(default is 10). 
                       fL = sum(hit_history(lT(valL)))/length(valL);
                       fR = sum(hit_history(rT(valR)))/length(valR);
+                      fA = sum(hit_history(aT(valA)))/length(valA);
                      
                       %the way the autotrainer is set up is dependent only
                       %on miss trials, which don't exist for A (abscent)
@@ -284,12 +290,14 @@ function [x, y] = SidesSection(obj, action, x, y)
                       %abscent and R L conditions
                       
                       % bias
-                      lpp = lpp - ((fL - fR)/2);
-                      rpp = rpp - ((fR - fL)/2);
+                      lpp = lpp - ((fL - fR - fA)/3);
+                      rpp = rpp - ((fR - fL - fA)/3);
+                      absp= absp -((fA - fR - fL)/3);
                       disp(['Using left probabiliy: ' num2str(lpp)]);
                       disp(['Using right probabiliy: ' num2str(rpp)]);
-                      if (lpp < 0) ; lpp = 0; elseif (lpp > 1-absp) ; lpp = 1-absp ; end
-                      if (rpp < 0) ; rpp = 0; elseif (rpp > 1-absp) ; rpp = 1-absp ; end
+                      disp(['Using absent probabiliy: ' num2str(absp)]);
+%                       if (lpp < 0) ; lpp = 0; elseif (lpp > 1-absp) ; lpp = 1-absp ; end
+%                       if (rpp < 0) ; rpp = 0; elseif (rpp > 1-absp) ; rpp = 1-absp ; end
                       absp
                       lpp
                       rpp

@@ -22,12 +22,12 @@
       push_history(LastTrialEvents);
       LastTrialEvents.value = [];
       
-      if rows(pstruct.punish)>0 
+      if rows(pstruct.punish)>0 %if punish trial then...
           hit = 0;
           %this will work fine for the trial 'a' condition, just have to plot based on 
           %lick port and trial type-psm
       elseif rows(pstruct.miss)>0 %miss just means mouse didn't lick, thats it. 
-          %So for abscent correct rejection, must define this based on the trial type. 
+          %So for absent correct rejection, must define this based on the trial type. 
           if next_side=='a'
               hit = 2; %inicating a correct rejection-psm
           else
