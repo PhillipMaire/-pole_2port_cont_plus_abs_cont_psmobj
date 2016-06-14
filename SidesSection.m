@@ -294,6 +294,9 @@ function [x, y] = SidesSection(obj, action, x, y)
                       fL = sum(hit_history(lT(valL)))/length(valL);
                       fR = sum(hit_history(rT(valR)))/length(valR);
                       fA = sum(hit_history(aT(valA)))/length(valA);
+                      if fL == inf fL = 0; end
+                      if fR == inf fR = 0; end
+                      if fA == inf fA = 0; end
                      
                       %the way the autotrainer is set up is dependent only
                       %on miss trials, which don't exist for A (abscent)
@@ -311,11 +314,8 @@ function [x, y] = SidesSection(obj, action, x, y)
                       disp(['Using left probabiliy: ' num2str(lpp)]);
                       disp(['Using right probabiliy: ' num2str(rpp)]);
                       disp(['Using absent probabiliy: ' num2str(absp)]);
-%                       if (lpp < 0) ; lpp = 0; elseif (lpp > 1-absp) ; lpp = 1-absp ; end
-%                       if (rpp < 0) ; rpp = 0; elseif (rpp > 1-absp) ; rpp = 1-absp ; end
-                      absp
-                      lpp
-                      rpp
+                      if (lpp < 0) ; lpp = 0; elseif (lpp > 1-absp) ; lpp = 1-absp ; end
+                      if (rpp < 0) ; rpp = 0; elseif (rpp > 1-absp) ; rpp = 1-absp ; end)
                   end
               end
       end
