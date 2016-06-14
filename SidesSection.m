@@ -89,14 +89,20 @@ function [x, y] = SidesSection(obj, action, x, y)
       SoloFunctionAddVars('make_and_upload_state_matrix', 'ro_args', 'RewardOnWrong');
       
       % Max number of times same side can appear
+      MenuParam(obj, 'MaxSameTwo', {'2' '3' '4' '5' '6' '7' '8' '9' '10' '11' '12' '13' '14' '15' 'Inf'}, ...
+                '5', x, y);
+      next_row(y);
       MenuParam(obj, 'MaxSame', {'1' '2' '3' '4' '5' '6' '7' '8' 'Inf'}, ...
                 '3', x, y);
       next_row(y);
       % Prob of choosing left as correct side
+%       NumeditParam(obj, 'AbsentProb', 0.2, x, y); 
+%       next_row(y, 1);
       NumeditParam(obj, 'LeftPortProb', 0.4, x, y); 
       next_row(y, 1);
       NumeditParam(obj, 'RightPortProb', 0.4, x, y); 
       next_row(y, 1);
+     
 %have to set so that 
 %if RightPortProb(1)+LeftPortProb(1)+OutReachProb(1)~=1
     %based on most recent updated gui of these three -psm
@@ -110,8 +116,8 @@ function [x, y] = SidesSection(obj, action, x, y)
       set(value(myaxes), 'Units', 'pixels');
       set(value(myaxes), 'Position', [90 pos(4)-110 pos(3)-130 90]);
       set(value(myaxes), 'YTick', [1 1.5 2], 'YLim', [0.5 2.5], 'YTickLabel', ...
-                        {'abscent', 'Right', 'Left'});%psm depending on what we want 
-                    %I might have to chnage this to abscent right and left or at lease 
+                        {'Absent', 'Right', 'Left'});%psm depending on what we want 
+                    %I might have to chnage this to absent right and left or at lease 
                     %change the symbols for these so that we can distinguish them.
       NumeditParam(obj, 'ntrials', 100, x, y, ...
                    'position', [5 pos(4)-75 40 40], 'labelpos', 'top', ...
@@ -135,6 +141,15 @@ function [x, y] = SidesSection(obj, action, x, y)
       pickAtRandom = 0; % if 1, will simply use leftPortProb
       lpp = value(LeftPortProb); % this is changed by probabalistic autotrainer
       rpp = value(RightPortProb);
+      if rpp+lpp>1 
+          warning('PROBABILITY NOT EQUAL TO 1! CHANGE AND HIT ANY KEY')
+          pause
+          display(' ')
+          display('DID YOU CORRECT THE PROBABILITY VALUE?')
+          display(' ')
+          display('IF SO HIT ANY KEY TWICE TO CONTINUE')
+          pause, pause
+      end
       absp=1-rpp-lpp;
       ntbc = value (NumTrialsBiasCalc);
       
@@ -305,57 +320,110 @@ function [x, y] = SidesSection(obj, action, x, y)
               end
       end
       
-      %%%%%%%%%%%%%%%end of autotrainer switch%%%%%%%%%%%%%%%%
-
-       % --- if you are to simply pick at random ...
-       %pickAtRandom is set to 1 when  autotrainer is off (or using probabalistic autotrainer
-       % which updates the lpp based on probabilitty), thus the 
-       %below if statment just tests for autotrainer dropdown box selection
-       if(pickAtRandom)
-
+      %%%%%%%%%%%%%%%END OF AUTOTRAINER SWITCH%%%%%%%%%%%%%%%%
+      
+      % --- if you are to simply pick at random ...
+      %pickAtRandom is set to 1 when  autotrainer is off (or using probabalistic autotrainer
+      % which updates the lpp based on probabilitty), thus the
+      %below if statment just tests for autotrainer dropdown box selection
+      if(pickAtRandom)
+          MaxSameIndicator = 0; %0 means MaxSame not used to calculate next_side
           brutal_side.value = ''; % in case there is something there
-               
+
+          
+
           % If MaxSame doesn't apply yet, choose at random
-          if strcmp(value(MaxSame), 'Inf') | MaxSame > n_started_trials,
-             
-             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%-psm 
+          if value(MaxSame)==Inf || MaxSame > n_started_trials
+
+              %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%-psm
               randVar=rand(1); %needs to be a variable so that it can be used in two
               %consecutive if statemnts-psm
-              if randVar<=lpp, next_side = 'l'; 
-               elseif randVar>lpp && randVar<=lpp+rpp, next_side = 'r'; %psm
-               else next_side = 'a'; %psm%
-             end;
-             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-          else 
-             % MaxSame applies, check for its rules:
-             % If there's been a string of MaxSame guys all the same, force change:
-             if all(previous_sides(n_started_trials-MaxSame+1:n_started_trials) == ...
-                    previous_sides(n_started_trials))
-                if previous_sides(n_started_trials)=='l' 
-                    %%%%%-psm takes care of max same by choosing one of the other 
-                    %two variables based on their relitive probabilities 
-                     if rand(1)<=rpp/(rpp+absp), next_side = 'r'; 
-                     else next_side = 'a';
-                     end
-                elseif previous_sides(n_started_trials)=='r' 
-                     if rand(1)<=lpp/(lpp+absp), next_side = 'l'; 
-                     else next_side = 'a';
-                     end
-                elseif previous_sides(n_started_trials)=='a' 
-                     if rand(1)<=lpp/(lpp+rpp), next_side = 'l'; 
-                     else next_side = 'r';
-                     end
-                end;
-             else
-                % Haven't reached MaxSame limits yet, choose at random:
-                randVar=rand(1);
-                if randVar<=lpp, next_side = 'l'; 
+              if randVar<=lpp, next_side = 'l';
+              elseif randVar>lpp && randVar<=lpp+rpp, next_side = 'r'; %psm
+              else next_side = 'a'; 
+              end;
+          else
+              %%%WARNINGS 
+              
+              if isinf(lpp/(rpp+absp))|| isinf(rpp/(lpp+absp))
+                  display(' ')
+                  display('WARNING RIGHT OR LEFT PROB IS 1, DEFAULT ALTERNATIVE IS ABSENT')
+                  display(' ')
+              elseif isinf(absp/(lpp+rpp))
+                  display(' ')
+                  display('WARNING ABSENT PROB IS 1, DEFAULT ALTERNATIVE IS RIGHT')
+                  display(' ')
+              end
+              % MaxSame applies, check for its rules:
+              % If there's been a string of MaxSame guys all the same, force change:
+              if all(previous_sides(n_started_trials-MaxSame+1:n_started_trials) == ...
+                      previous_sides(n_started_trials))
+                  MaxSameIndicator=1;%max same is used
+                  if previous_sides(n_started_trials)=='l'
+                      %%%%% takes care of max same by choosing one of the other
+                      %two variables based on their relitive probabilities
+                      %-psm
+                      if rand(1)<=rpp/(rpp+absp), next_side = 'r';
+                      else next_side = 'a';
+                      end
+                  elseif previous_sides(n_started_trials)=='r'
+                      if rand(1)<=lpp/(lpp+absp), next_side = 'l';
+                      else next_side = 'a';
+                      end
+                  elseif previous_sides(n_started_trials)=='a';
+                      if rand(1)<=lpp/(lpp+rpp), next_side = 'l';
+                      else next_side = 'r';
+                      end
+                  end;
+              else
+                  % Haven't reached MaxSame limits yet, choose at random:
+                  randVar=rand(1);
+                  if randVar<=lpp, next_side = 'l';
                   elseif randVar>lpp && randVar<=lpp+rpp, next_side = 'r'; %psm
-                  else next_side = 'a' 
-                end;
-             end;
+                  else next_side = 'a';
+                  end;
+              end;
           end;
-       end
+          
+          %%%%%%%%%%%%%%%%%%%%%%%%MAX SAME TWO START%%%%%%%%%%%%%%%%%%%
+          if MaxSameIndicator==0 && (value(MaxSameTwo)==Inf || MaxSameTwo > n_started_trials)
+              randVar=rand(1); %needs to be a variable so that it can be used in two
+              %consecutive if statemnts-psm
+              if randVar<=lpp, next_side = 'l';
+              elseif randVar>lpp && randVar<=lpp+rpp, next_side = 'r';
+              else next_side = 'a';
+              end;
+          elseif  value(MaxSameTwo)~=Inf && MaxSameTwo <= n_started_trials ...
+                  && numel(unique(previous_sides(n_started_trials-MaxSameTwo+1:n_started_trials))) ==2;
+              uniqueVar = unique(previous_sides(n_started_trials-MaxSameTwo+1:n_started_trials));
+              compVar = [97 108 114]; %char of 'a' 'l' and 'r' -psm
+              next_side = char(setdiff(compVar, uniqueVar));
+          elseif  value(MaxSameTwo)~=Inf && MaxSameTwo <= n_started_trials ...
+                  && numel(unique(previous_sides(n_started_trials-MaxSameTwo+1:n_started_trials))) ==1
+              uniqueVar = char(unique(previous_sides(n_started_trials-MaxSameTwo+1:n_started_trials)));
+              if uniqueVar=='l'
+                  if rand(1)<=rpp/(rpp+absp), next_side = 'r';
+                  else next_side = 'a';
+                  end
+              elseif uniqueVar=='r'
+                  if rand(1)<=lpp/(lpp+absp), next_side = 'l';
+                  else next_side = 'a';
+                  end
+              else %for 'a' trials
+                  if rand(1)<=lpp/(lpp+rpp), next_side = 'l';
+                  else next_side = 'r';
+                  end
+              end
+          elseif MaxSameIndicator==0  % Haven't reached MaxSameTwo and MaxSame doesn't apply then choose at random
+              randVar=rand(1);
+              if randVar<=lpp, next_side = 'l';
+              elseif randVar>lpp && randVar<=lpp+rpp, next_side = 'r';
+              else next_side = 'a';
+              end;
+          end;
+
+          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      end
 
 
     %  session_type = SessionTypeSection(obj,'get_session_type'); 
@@ -379,7 +447,7 @@ function [x, y] = SidesSection(obj, action, x, y)
       left_port_prob_history.value = [lpph];
       
     case 'get_next_side',   % --------- CASE GET_NEXT_SIDE ------
-      if isempty(previous_sides),
+      if isempty(previous_sides)
          error('Don''t have next side chosen! Did you run choose_next_side?');
       end;
       x = previous_sides(length(previous_sides));
@@ -396,20 +464,20 @@ function [x, y] = SidesSection(obj, action, x, y)
          hb = line(length(previous_sides), 2, 'Parent', value(myaxes));
       elseif ps(end)=='r',                          
          hb = line(length(previous_sides), 1.5, 'Parent', value(myaxes));
-      else %for abscent condition ps(end)=='a'    
+      else %for absent condition ps(end)=='a'    
          hb = line(length(previous_sides), 1, 'Parent', value(myaxes));
       end;
       set(hb, 'Color', 'b', 'Marker', '.', 'LineStyle', 'none');
       
       % GREEN markers for correct
-      xgreen   = find(hit_history == 1|hit_history==2);%2's are for the correct rejections of abscent trials-psm
+      xgreen   = find(hit_history == 1|hit_history==2);%2's are for the correct rejections of absent trials-psm
       lefts    = find(previous_sides(xgreen) == 'l');
       rghts    = find(previous_sides(xgreen) == 'r');
-      abscents =find(previous_sides(xgreen) == 'a');
+      absents =find(previous_sides(xgreen) == 'a');
       
       
       ygreen = zeros(size(xgreen)); ygreen(lefts) = 2; 
-      ygreen(rghts) = 1.5; ygreen(abscents) = 1; 
+      ygreen(rghts) = 1.5; ygreen(absents) = 1; 
       
       hg = line(xgreen, ygreen, 'Parent', value(myaxes));
       set(hg, 'Color', 'g', 'Marker', '.', 'LineStyle', 'none'); 
@@ -418,9 +486,9 @@ function [x, y] = SidesSection(obj, action, x, y)
       xred     = find(hit_history == 0);
       lefts    = find(previous_sides(xred) == 'l');
       rghts    = find(previous_sides(xred) == 'r');
-      abscents = find(previous_sides(xred) == 'a');
+      absents = find(previous_sides(xred) == 'a');
       yred = zeros(size(xred)); yred(lefts) = 2; 
-      yred(rghts) = 1.5;  yred(abscents) = 1;
+      yred(rghts) = 1.5;  yred(absents) = 1;
       hr = line(xred, yred, 'Parent', value(myaxes));
       set(hr, 'Color', 'r', 'Marker', '.', 'LineStyle', 'none'); 
       

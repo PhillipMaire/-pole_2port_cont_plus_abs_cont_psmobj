@@ -212,15 +212,15 @@ switch action
            eto_t = eto_t - puff_t;
            eto_t = max(eto_t,.01);
 
-           if next_side=='r' % 'r' means right trial.
+           if next_side=='r'; % 'r' means right trial.
                onlickL = sPun; % incorrect
                onlickR = sRwR; % correct
                water_t = RWaterValveTime; % Defined in ValvesSection.m.  
-           elseif next_side=='l' %left 
+           elseif next_side=='l'; %left 
                onlickR = sPun; % punish
                onlickL = sRwL; % water to left port
                water_t = LWaterValveTime; % Defined in ValvesSection.m. 
-           else next_side=='a' %for abscent condition -psm
+           else next_side=='a'; %for absent condition -psm
                 onlickL = sPun;
                 onlickR = sPun;
                 water_t = 0;
