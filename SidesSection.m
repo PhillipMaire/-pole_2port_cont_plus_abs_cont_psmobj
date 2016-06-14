@@ -305,9 +305,9 @@ function [x, y] = SidesSection(obj, action, x, y)
                       disp(['Using right probabiliy: ' num2str(rpp)]);
                       if (lpp < 0) ; lpp = 0; elseif (lpp > 1-absp) ; lpp = 1-absp ; end
                       if (rpp < 0) ; rpp = 0; elseif (rpp > 1-absp) ; rpp = 1-absp ; end
-                      absp
                       lpp
                       rpp
+                      absp
                   end
               end
       end
