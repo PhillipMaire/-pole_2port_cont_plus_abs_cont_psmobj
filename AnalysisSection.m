@@ -99,8 +99,13 @@ switch action
         % ALL trials
         sL = find(previous_sides(1:end-1) == 108); % 108 is char for l
         sR = find(previous_sides(1:end-1) == 114); % 114 is char for r
+        sA = find(previous_sides(1:end-1) ==  97); % 97 is char for a
+        
         sLNI = find(previous_sides(1:end-1) == 108 & correct' >= 0 ); % 108 is char for l
         sRNI = find(previous_sides(1:end-1) == 114 & correct' >= 0 ); % 114 r
+        %sANI is just 1's right now will chnage after I understand
+        %code-####
+        sANI = find(previous_sides(1:end-1) ==  97 & correct' >= 0 ); % 97 a
         
         % only consider trials w/ respnoses
         if (length(nonIgnores) >= 61)
@@ -108,17 +113,23 @@ switch action
             sL60 = find(previous_sides(nI60) == 108 ...
                 & correct(nI60)' >= 0 ); % 108 is char for l
             sR60 = find(previous_sides(nI60) == 114 & ...
-                correct(nI60)' >= 0); % 108 is char for 4
+                correct(nI60)' >= 0); % 108 is char for r
+            
+            sA60 = find(previous_sides(nI60) == 97 & ...
+                correct(nI60)' >= 0); % 97 is char for a
+            %#####all 1 for noe check later and delete note
             sL60 = nI60(sL60);
             sR60 = nI60(sR60);
+            sA60 = nI60(sA60);
         else
-            sL60 = [] ;sR60 = [];
+            sL60 = [] ;sR60 = [];sA60 = [];
         end
         
         % quartile estimator -- assumption is that each extremal quartile
         %  is for one lickport.  Only consider trials w/ responses
         posrange = 0;
         sQ1 = []; sQ4= [];
+        %%%%%%%dont think this is used at all -psm below 
         if (length(pole_position_history) > 0 && range(pole_position_history) > 0)
           % ORIGINAL
           %posrange = range(pole_position_history);
@@ -143,24 +154,28 @@ switch action
               sQ4 = eq4i;
           end
         end
-        
+         %%%%%%%dont think this is used at all -psm above 
         % --- compute parameters
         
         % # trials
         nt =     [length(sL) ...
                   length(sR) ...
+                  length(sA) ...
                   length(previous_sides(1:end-1))];
         ntNI =     [length(sLNI) ...
                   length(sRNI) ...
+                  length(sANI) ...
                   length(nonIgnores)];
-        nt60 = [length(sL60) length(sR60)];
-        ntEQ = [length(sQ4) length(sQ1)];
+        nt60 = [length(sL60) length(sR60) length(sR60)];
+        ntEQ = [length(sQ4) length(sQ1) length(sQ1)];
         
         % # rewards
         nr = [length(find(correct(sL) ==1)) length(find(correct(sR) ==1)) ...
-              length(find(correct == 1))];
-        nr60 = [length(find(correct(sL60) ==1)) length(find(correct(sR60) ==1))];
-        nrEQ = [length(find(correct(sQ4) ==1)) length(find(correct(sQ1) ==1))];
+            length(find(correct(sA) ==2))   length(find(correct >= 1))];
+        nr60 = [length(find(correct(sL60) ==1)) length(find(correct(sR60) ==1))...
+            length(find(correct(sA60) ==2))];
+        nrEQ = [length(find(correct(sQ4) ==1)) length(find(correct(sQ1) ==1))...
+            length(find(correct(sQ1) ==1))];
          
         % # incorrects (DISTINCT from cases where he did not respond)
         ni = [length(find(correct(sL) ==0)) length(find(correct(sR) ==0)) ...
