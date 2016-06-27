@@ -15,7 +15,7 @@
 %            'reinit'    Delete all of this section's GUIs and data,
 %                        and reinit, at the same position on the same
 %                        figure as the original section GUI was placed.
-%           
+%
 %            Several other actions are available (see code of this file).
 %
 % x, y     Relevant to action = 'init'; they indicate the initial
@@ -40,10 +40,10 @@ global state_machine_properties;
 switch action
 
     case 'init',   % ------------ CASE INIT ----------------
-        
+
         % Save the figure and the position in the figure where we are
         % going to start adding GUI elements:
-        SoloParamHandle(obj, 'my_gui_info', 'value', [x y gcf]); 
+        SoloParamHandle(obj, 'my_gui_info', 'value', [x y gcf]);
         next_row(y);
 
         MenuParam(obj, 'sm_control_show', {'view', 'hide'}, 'hide', x, y, 'label', 'SM Control', 'TooltipString', 'Control state machine');
@@ -64,14 +64,29 @@ switch action
         PushButtonParam(obj, 'force_state_35', x, y, 'label', 'force_state_35');
         set_callback(force_state_35, {mfilename, 'force_state_35'});
         next_row(y);
-        
+
         PushButtonParam(obj, 'force_state_0', x, y, 'label', 'force_state_0');
         set_callback(force_state_0, {mfilename, 'force_state_0'});
         next_row(y);
 
+        PushButtonParam(obj, 'force_state_43', x, y, 'label', 'bypass resp. delay force_state_43');
+        set_callback(force_state_43, {mfilename, 'force_state_43'});
+        next_row(y);
         
+         PushButtonParam(obj, 'force_state_52', x, y, 'label', 'reward_port_force_state_52');
+        set_callback(force_state_52, {mfilename, 'force_state_52'});
+        next_row(y);
+
+        PushButtonParam(obj, 'force_state_47', x, y, 'label', 'L port force_state_47');
+        set_callback(force_state_47, {mfilename, 'force_state_47'});
+        next_row(y);
+
+        PushButtonParam(obj, 'force_state_48', x, y, 'label', ' R port force_state_48');
+        set_callback(force_state_48, {mfilename, 'force_state_48'});
+        next_row(y);
+
         SMControlSection(obj,'hide_show');
-        
+
         x = parentfig_x; y = parentfig_y;
         set(0,'CurrentFigure',value(myfig));
         return;
@@ -79,11 +94,23 @@ switch action
     case 'force_state_35',
         ForceState35(state_machine_properties.sm);
         return;
-        
+
     case 'force_state_0',
         ForceState0(state_machine_properties.sm);
         return;
-    
+
+    case 'force_state_43',
+        ForceStateAny(state_machine_properties.sm, 43);
+        return;
+    case 'force_state_47',
+        ForceStateAny(state_machine_properties.sm, 47);
+        return;
+    case 'force_state_48',
+        ForceStateAny(state_machine_properties.sm, 48);
+        return;
+    case 'force_state_52',
+        ForceStateAny(state_machine_properties.sm, 52);
+        return;
     case 'hide_show'
         if strcmpi(value(sm_control_show), 'hide')
             set(value(smfig), 'Visible', 'off');

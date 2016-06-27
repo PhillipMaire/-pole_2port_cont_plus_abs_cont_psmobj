@@ -39,7 +39,7 @@ function [x, y] = SessionTypeSection(obj, action, x, y)
       % going to start adding GUI elements:
       SoloParamHandle(obj, 'my_gui_info', 'value', [x y gcf]);
 
-      MenuParam(obj, 'SessionType', {'Licking','2port-Discrim',...
+      MenuParam(obj, 'SessionType', {'Manual-Training', 'Licking','2port-Discrim',...
           'Water-Valve-Calibration','Beam-Break-Indicator'},'2port-Discrim', x, y);
       
       SoloFunctionAddVars('make_and_upload_state_matrix', 'ro_args', {'SessionType'});

@@ -64,7 +64,7 @@ switch action
    etid = 2^4; % EPHUS (electrophysiology) trigger ID.
    slid = 2^5; % Signal line for signaling trial numbers and fiducial marks.
    rcid = 2^3; % Reward cue ID (sound)
-   
+   absentNoRewid= 2^8;
    puffid = 0; % Airpuff valve ID. DISABLED
    
    rwvtm = RWaterValveTime; % Defined in ValvesSection.m.  
@@ -119,7 +119,194 @@ switch action
    switch SessionType % determined by SessionTypeSection
         
       case 'Water-Valve-Calibration'
-  
+          
+       case 'Manual-Training'
+           %Lin     Lout  Rin Rout   Tup  Tim  Dou Aou  (Dou is bitmask format)
+           
+%            stm = [stm ;
+%                b     b    b    b     35  .01      0         0  ; ... % wait for lick  (This is state 40)
+%                b+1   b+1  b+1  b+1   35  lwvtm  wvLid     0  ; ... % licked left -- reward left
+%                b+2   b+2  b+2  b+2   35  rwvtm  wvRid     0  ; ... % licked right -- reward right
+%                ];
+%            pause(20)
+ % ---- labeling of states
+           sBC = b; % bitcode
+           sPrTP = b+1; % pretrial pause
+           sPMS = b+2; % pole move & sample period
+           sPrAP = b+3; % preanswer pause
+           sLoMi = b+4; % log miss/ignore
+           sLoCR = b+18; %testingpsm %log correct rejection
+           sPoTP = b+5; % posttrial pause
+           sPun = b+6; % punish (be it airpuff, timeout, or whatev)  
+           sRwL = b+7; % reward left
+           sRwR = b+8; % reward right
+           sRCaT = b+9;%12; % to log unrewarded correct trals (catch)
+           sRCol = b+10;%13; % give animal time to collect reward         
+           sRDel = b+11;%17 ; % restart delay   
+           
+           
+           % ---- assign gui variables
+           ap_t = value(AnswerPeriodTime);
+           sp_t = SamplingPeriodTime;
+           eto_t = max(.01,ExtraITIOnError);
+           pr_t = PoleRetractTime;
+           pa_t = PreAnswerTime;
+           prep_t = PreTrialPauseTime;
+           postp_t = PostTrialPauseTime;
+           rc_t = RewardCueTime;
+           rcoll_t = RewardCollectTime;
+           lpt_t = LickportTravelTime;
+           
+           puff_t = AirpuffTime;
+           
+           wdraw_t = 0.3; % how long to stay in withdraw state and allow its detection
+           
+           % Check for (min,max) PreAnswerTime
+           if (~isnumeric(pa_t)) % assume format is correct!
+              comIdx = find(pa_t == ',');
+              if (length(comIdx) > 0)
+                  minValuePAT = str2num(pa_t(2:comIdx-1));
+                  maxValuePAT = str2num(pa_t(comIdx+1:end-1));
+                  pa_t = minValuePAT + ((maxValuePAT-minValuePAT)*rand(1));
+              else 
+                  disp('Bad format ; settig PreAnswerTime to 0');
+                  pa_t= 0;
+              end
+           end
+              
+           % puff disabled? can't have 0 time or RT freaks; set valve id
+           % off instead
+           if (puff_t == 0)
+               puff_t = 0.01;
+               puffid = 0;
+           else
+               disp('*** At this time, airpuff is disabled. ***');
+           end
+           
+           % Reward cue disabled? turn off valve, but must be at least
+           % minimal time long
+           if (rc_t == 0)
+               rc_t = 0.01;
+               rcid = 0;
+           end
+           
+           % Adjust prepause based on bitcode, initial trigger
+           prep_t = prep_t - 0.01 - 0.07; % 2 ms bit, 5 ms interbit, 10 bits = 70 ms = .07 s
+
+                % Alexis 9-2-14 DECLARE A WRONG
+                pps = sPoTP; % post-punish state default is post trial pause
+
+           onLickS = sPMS;%helps define if there is lick during the sample period.
+
+           % Adjust extra time out basd on airpuf tmie
+           eto_t = eto_t - puff_t;
+           eto_t = max(eto_t,.01);
+
+           if next_side=='r'; % 'r' means right trial.
+               onlickL = sPun; % incorrect
+               onlickR = sRwR; % correct
+               water_t = RWaterValveTime; % Defined in ValvesSection.m.  
+           elseif next_side=='l'; %left 
+               onlickR = sPun; % punish
+               onlickL = sRwL; % water to left port
+               water_t = LWaterValveTime; % Defined in ValvesSection.m. 
+           else next_side=='a'; %for absent condition -psm
+                onlickL = sPun;
+                onlickR = sPun;
+                water_t = 0.01; %set so that forced state when absent wont give infinity water (if 0) or reward on absent 
+           end  
+           
+           % Disable reward?  If so, do it by setting wv
+           pas = sPoTP;
+           if (FracNoReward > 0)
+               rvReward = rand;
+               if (rvReward < FracNoReward)
+                   disp('Random cancellation of reward.')
+                   wvLid = 0;
+                   wvRid = 0;
+                   pas = sRCaT;
+               end
+           end
+           rewVid=0;
+           if onlickR==48
+           rewVid=wvRid;
+           elseif onlickL==47
+           rewVid=wvLid;  
+           elseif onlickR==46 && onlickL==46
+           rewVid=absentNoRewid;
+           else 
+           error('L or R port id not 47 or 48 check make and upload state matrix')
+           end
+           
+           stm = [stm ;
+               %LinSt   LoutSt   RinSt    RoutSt   TimeupSt Time      Dou      Aou  (Dou is bitmask format)
+               % line b (sBC = b)
+               sBC      sBC      sBC      sBC      101      .01       etid            0; ... %40 send bitcode
+               sPrTP    sPrTP    sPrTP    sPrTP    sPMS     prep_t    0               0; ... %41 pretrial pause %Possibly sPMS -> sAns
+               onLickS  onLickS  onLickS  onLickS  sPrAP    pr_t+sp_t pvid            0; ... %42 Preanswer Pause
+               onlickL  onlickL  onlickR  onlickR  sLoMi    ap_t      pvid            0; ... %43 Check if correct lick
+               sLoMi    sLoMi    sLoMi    sLoMi    sPoTP    0.001     0               0; ... %44 log miss/ignore
+               sPoTP    sPoTP    sPoTP    sPoTP    35       postp_t   0               0; ... %45 posttrial pause
+               sPun     sPun     sPun     sPun     pps      eto_t     pvid            0; ... %46 punish
+               sRwL     sRwL     sRwL     sRwL     sRCol    water_t   pvid+wvLid      0; ... %47 reward left
+               sRwR     sRwR     sRwR     sRwR     sRCol    water_t   pvid+wvRid      0; ... %48 reward right                      
+               sRCaT    sRCaT    sRCaT    sRCaT    sPoTP    0.001     pvid            0; ... %49 to log unrewarded correct trials              
+               sRCol    sRCol    sRCol    sRCol    sPoTP    rcoll_t   pvid            0; ... %50 give animal time to collect reward              
+               sRDel    sRDel    sRDel    sRDel    sPrAP    0.001     0               0; ... %51 restart delay 
+               52       52       52       52       sRCol    water_t   pvid+rewVid     0; ... %52reward 
+               ];
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%-psm           
+%            stm = [stm ;
+%                %LinSt   LoutSt   RinSt    RoutSt   TimeupSt Time      Dou      Aou  (Dou is bitmask format)
+%                % line b (sBC = b)
+%                sBC      sBC      sBC      sBC      101      .01       etid       0; ... % send bitcode
+%                sPrTP    sPrTP    sPrTP    sPrTP    sPMS     prep_t    0          0; ... % pretrial pause %Possibly sPMS -> sAns
+%                onLickS  onLickS  onLickS  onLickS  sPrAP    pr_t+sp_t pvid       0; ... % Preanswer Pause
+%                onlickL  onlickL  onlickR  onlickR  sLoMi    ap_t      pvid          0; ... % Check if correct lick
+%                sLoMi    sLoMi    sLoMi    sLoMi    sPoTP    0.001     0          0; ... % log miss/ignore
+%                sPoTP    sPoTP    sPoTP    sPoTP    35       postp_t   0          0; ... % posttrial pause
+%                sPun     sPun     sPun     sPun     pps      eto_t     pvid          0; ... % punish
+%                sRwL     sRwL     sRwL     sRwL     sRCol    water_t   pvid+wvLid      0; ... % reward left
+%                sRwR     sRwR     sRwR     sRwR     sRCol    water_t   pvid+wvRid      0; ... % reward right                      
+%                sRCaT    sRCaT    sRCaT    sRCaT    sPoTP    0.001     pvid          0; ... % to log unrewarded correct trials              
+%                sRCol    sRCol    sRCol    sRCol    sPoTP    rcoll_t   pvid          0; ... % give animal time to collect reward              
+%                sRDel    sRDel    sRDel    sRDel    sPrAP    0.001     0          0; ... % restart delay              
+%                ];
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%-psm
+           %------ Signal trial number on digital output given by 'slid':
+           % Requires that states 101 through 101+2*numbits be reserved
+           % for giving bit signal.
+           
+           trialnum = n_done_trials + 1;
+           
+           bittm = 0.002; % bit time
+           gaptm = 0.005; % gap (inter-bit) time
+           numbits = 10; %2^10=1024 possible trial nums
+           
+           
+           x = double(dec2binvec(trialnum)');%Convert decimal value to binary vector
+           if length(x) < numbits
+               x = [x; repmat(0, [numbits-length(x) 1])];
+               %builds 0's on x so that it is 
+               %the proper size for the bit code
+           end
+           % x is now 10-bit vector giving trial num, LSB first (at top).
+           x(x==1) = slid;
+           
+           % Insert a gap state between bits, to make reading bit pattern clearer:
+           x=[x zeros(size(x))]';
+           x=reshape(x,numel(x),1);
+           
+           y = (101:(100+2*numbits))';
+           t = repmat([bittm; gaptm],[numbits 1]);
+           m = [y y y y y+1 t x zeros(size(y))];
+           m(end,5) = sPrTP; % jump back to PREPAUSE.
+           
+           stm = [stm; zeros(101-rows(stm),8)];
+           stm = [stm; m];
+
+          
+
        case 'Licking'
            %Lin     Lout  Rin Rout   Tup  Tim  Dou Aou  (Dou is bitmask format)
            stm = [stm ;
@@ -247,12 +434,12 @@ switch action
                onlickL  onlickL  onlickR  onlickR  sLoMi    ap_t      pvid          0; ... % Check if correct lick
                sLoMi    sLoMi    sLoMi    sLoMi    sPoTP    0.001     0          0; ... % log miss/ignore
                sPoTP    sPoTP    sPoTP    sPoTP    35       postp_t   0          0; ... % posttrial pause
-               sRDel    sRDel   sRDel     sRDel    pps      eto_t     pvid          0; ... % punish
+               sPun     sPun     sPun     sPun     pps      eto_t     pvid          0; ... % punish
                sRwL     sRwL     sRwL     sRwL     sRCol    water_t   pvid+wvLid      0; ... % reward left
                sRwR     sRwR     sRwR     sRwR     sRCol    water_t   pvid+wvRid      0; ... % reward right                      
                sRCaT    sRCaT    sRCaT    sRCaT    sPoTP    0.001     pvid          0; ... % to log unrewarded correct trials              
                sRCol    sRCol    sRCol    sRCol    sPoTP    rcoll_t   pvid          0; ... % give animal time to collect reward              
-               sRDel    sRDel    sRDel    sRDel    sPun     0.001     pvid          0; ... % restart delay              
+               sRDel    sRDel    sRDel    sRDel    sPrAP    0.001     0          0; ... % restart delay              
                ];
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%-psm           
 %            stm = [stm ;

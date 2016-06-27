@@ -35,7 +35,7 @@ n_started_trials.value = n_started_trials + 1;
 
 
 
-if ismember(SessionType, {'Discrim_DHO','2port-Discrim'})
+if ismember(SessionType, {'Discrim_DHO','2port-Discrim','Manual-Training'})
         disp(['Starting move...'])     
 %         tic
         MotorsSection(obj,'move_next_side'); % chooses and *moves* to next side
