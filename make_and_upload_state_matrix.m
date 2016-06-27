@@ -247,12 +247,12 @@ switch action
                onlickL  onlickL  onlickR  onlickR  sLoMi    ap_t      pvid          0; ... % Check if correct lick
                sLoMi    sLoMi    sLoMi    sLoMi    sPoTP    0.001     0          0; ... % log miss/ignore
                sPoTP    sPoTP    sPoTP    sPoTP    35       postp_t   0          0; ... % posttrial pause
-               sPun     sPun     sPun     sPun     pps      eto_t     pvid          0; ... % punish
+               sRDel    sRDel   sRDel     sRDel    pps      eto_t     pvid          0; ... % punish
                sRwL     sRwL     sRwL     sRwL     sRCol    water_t   pvid+wvLid      0; ... % reward left
                sRwR     sRwR     sRwR     sRwR     sRCol    water_t   pvid+wvRid      0; ... % reward right                      
                sRCaT    sRCaT    sRCaT    sRCaT    sPoTP    0.001     pvid          0; ... % to log unrewarded correct trials              
                sRCol    sRCol    sRCol    sRCol    sPoTP    rcoll_t   pvid          0; ... % give animal time to collect reward              
-               sRDel    sRDel    sRDel    sRDel    sPrAP    0.001     0          0; ... % restart delay              
+               sRDel    sRDel    sRDel    sRDel    sPun     0.001     pvid          0; ... % restart delay              
                ];
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%-psm           
 %            stm = [stm ;
