@@ -262,27 +262,6 @@ switch action
                     sRDel    sRDel    sRDel    sRDel    sPun     0.001     pvid              0; ... %51 restart delayy
                     52       52       52       52       sRCol    water_t   pvid+rewVid       0; ... %52 reward correct port
                     ];
-                % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%-psm
-                %            stm = [stm ;
-                %                %LinSt   LoutSt   RinSt    RoutSt   TimeupSt Time      Dou      Aou  (Dou is bitmask format)
-                %                % line b (sBC = b)
-                %                sBC      sBC      sBC      sBC      101      .01       etid       0; ... % send bitcode
-                %                sPrTP    sPrTP    sPrTP    sPrTP    sPMS     prep_t    0          0; ... % pretrial pause %Possibly sPMS -> sAns
-                %                onLickS  onLickS  onLickS  onLickS  sPrAP    pr_t+sp_t pvid       0; ... % Preanswer Pause
-                %                onlickL  onlickL  onlickR  onlickR  sLoMi    ap_t      pvid          0; ... % Check if correct lick
-                %                sLoMi    sLoMi    sLoMi    sLoMi    sPoTP    0.001     0          0; ... % log miss/ignore
-                %                sPoTP    sPoTP    sPoTP    sPoTP    35       postp_t   0          0; ... % posttrial pause
-                %                sPun     sPun     sPun     sPun     pps      eto_t     pvid          0; ... % punish
-                %                sRwL     sRwL     sRwL     sRwL     sRCol    water_t   pvid+wvLid      0; ... % reward left
-                %                sRwR     sRwR     sRwR     sRwR     sRCol    water_t   pvid+wvRid      0; ... % reward right
-                %                sRCaT    sRCaT    sRCaT    sRCaT    sPoTP    0.001     pvid          0; ... % to log unrewarded correct trials
-                %                sRCol    sRCol    sRCol    sRCol    sPoTP    rcoll_t   pvid          0; ... % give animal time to collect reward
-                %                sRDel    sRDel    sRDel    sRDel    sPrAP    0.001     0          0; ... % restart delay
-                %                ];
-                % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%-psm
-                %------ Signal trial number on digital output given by 'slid':
-                % Requires that states 101 through 101+2*numbits be reserved
-                % for giving bit signal.
 
                 trialnum = n_done_trials + 1;
 
@@ -454,28 +433,9 @@ switch action
                     sRCaT    sRCaT    sRCaT    sRCaT    sPoTP    0.001     pvid              0; ... %49 to log unrewarded correct trials
                     sRCol    sRCol    sRCol    sRCol    sPoTP    rcoll_t   pvid              0; ... %50 give animal time to collect reward
                     sRDel    sRDel    sRDel    sRDel    sPun     0.001     pvid              0; ... %51 restart delay
+                    52       52       52       52       sRCol    water_t   pvid+rewVid       0; ... %52 reward correct port
                     ];
-                % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%-psm
-                %            stm = [stm ;
-                %                %LinSt   LoutSt   RinSt    RoutSt   TimeupSt Time      Dou      Aou  (Dou is bitmask format)
-                %                % line b (sBC = b)
-                %                sBC      sBC      sBC      sBC      101      .01       etid       0; ... % send bitcode
-                %                sPrTP    sPrTP    sPrTP    sPrTP    sPMS     prep_t    0          0; ... % pretrial pause %Possibly sPMS -> sAns
-                %                onLickS  onLickS  onLickS  onLickS  sPrAP    pr_t+sp_t pvid       0; ... % Preanswer Pause
-                %                onlickL  onlickL  onlickR  onlickR  sLoMi    ap_t      pvid          0; ... % Check if correct lick
-                %                sLoMi    sLoMi    sLoMi    sLoMi    sPoTP    0.001     0          0; ... % log miss/ignore
-                %                sPoTP    sPoTP    sPoTP    sPoTP    35       postp_t   0          0; ... % posttrial pause
-                %                sPun     sPun     sPun     sPun     pps      eto_t     pvid          0; ... % punish
-                %                sRwL     sRwL     sRwL     sRwL     sRCol    water_t   pvid+wvLid      0; ... % reward left
-                %                sRwR     sRwR     sRwR     sRwR     sRCol    water_t   pvid+wvRid      0; ... % reward right
-                %                sRCaT    sRCaT    sRCaT    sRCaT    sPoTP    0.001     pvid          0; ... % to log unrewarded correct trials
-                %                sRCol    sRCol    sRCol    sRCol    sPoTP    rcoll_t   pvid          0; ... % give animal time to collect reward
-                %                sRDel    sRDel    sRDel    sRDel    sPrAP    0.001     0          0; ... % restart delay
-                %                ];
-                % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%-psm
-                %------ Signal trial number on digital output given by 'slid':
-                % Requires that states 101 through 101+2*numbits be reserved
-                % for giving bit signal.
+
 
                 trialnum = n_done_trials + 1;
 
