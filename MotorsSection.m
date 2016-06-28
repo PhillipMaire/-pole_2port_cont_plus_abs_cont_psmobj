@@ -135,19 +135,19 @@ switch action
         %--------------- extreme positions for the multi-pole task --------------------------------
         next_row(y);
         NumeditParam(obj, 'no_pole_position_ant', 180000, x, y, 'label', ...
-            '"No" ant position','TooltipString','Far no trial position in microsteps.');
+            'L-port ant','TooltipString','left port anterior');
         
         next_row(y);
         NumeditParam(obj, 'no_pole_position_pos', 100001, x, y, 'label', ...
-            '"No" pos position','TooltipString','Near no trial position in microsteps.');
+            'L-port post','TooltipString','left port posterior');
         
         next_row(y);
         NumeditParam(obj, 'yes_pole_position_ant', 100000, x, y, 'label', ...
-            '"Yes" ant position','TooltipString','Far yes trial position in microsteps.');        
+            'R-port ant','TooltipString','right port anterior');        
         
         next_row(y);
         NumeditParam(obj, 'yes_pole_position_pos', 20000, x, y, 'label', ...
-            '"Yes" pos position','TooltipString','Near yes trial position in microsteps.');
+            'R-port post','TooltipString','right port posterior');
         %%%psm below 
         next_row(y);
         NumeditParam(obj, 'Absent_pole_position', 180000, x, y, 'label', ...
