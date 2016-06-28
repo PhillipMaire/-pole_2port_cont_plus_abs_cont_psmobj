@@ -57,7 +57,7 @@ set(value(myfig), 'Name', name, 'Tag', name, ...
 % Ok, at this point we have one SoloParamHandle, myfig 
 
 % Let's put the figure where we want it and give it a reasonable size:
-set(value(myfig), 'Position', [485   100   450   690]);
+set(value(myfig), 'Position', [485   100   450   735]);
 
 % Let's declare some globals that everybody is likely to want to know about.
 % Number of finished trials:

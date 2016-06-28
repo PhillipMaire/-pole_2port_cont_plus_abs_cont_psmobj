@@ -1,7 +1,7 @@
 function [x, y] = TimesSection(obj, action, x, y)
 
 GetSoloFunctionArgs;
-
+  
 switch action
     case 'init',
         % Save the figure and the position in the figure where we are
@@ -31,6 +31,9 @@ switch action
         NumeditParam(obj, 'PoleRetractTime', 0.2, x, y, 'TooltipString', ...
             'Time allowed for removing the pole before start answering period');
         next_row(y);
+        NumeditParam(obj, 'ManualSamplingPeriod', 0.0, x, y, 'TooltipString', ...
+            'ManualSamplingPeriod for manual training mode, make long and YOU give permission for animal to responds');
+        next_row(y);
         NumeditParam(obj, 'PreTrialPauseTime', 1, x, y, 'TooltipString', ...
             'Time before anything happens -- basically to allow F_0 sampling');
         next_row(y);
@@ -44,7 +47,7 @@ switch action
         SoloFunctionAddVars('make_and_upload_state_matrix', 'ro_args', ...
             {'ExtraITIOnError','SamplingPeriodTime','PreTrialPauseTime', ...
             'PreAnswerTime','PostTrialPauseTime','PoleRetractTime','RewardCollectTime', ...
-            'LickportTravelTime','RestartPreAnsOnLick'});
+            'LickportTravelTime','RestartPreAnsOnLick', 'ManualSamplingPeriod'});
         SoloFunctionAddVars('make_and_upload_state_matrix', 'rw_args', ...
             {'AnswerPeriodTime'});
             
