@@ -410,6 +410,18 @@ switch action
                         pas = sRCaT;
                     end
                 end
+                
+                rewVid=0;
+                if onlickR==48
+                    rewVid=wvRid;
+                elseif onlickL==47
+                    rewVid=wvLid;
+                elseif onlickR==46 && onlickL==46
+                    rewVid=absentNoRewid;
+                else
+                    error('L or R port id not 47 or 48 check make and upload state matrix')
+                end
+
 
                 % Restart PreAnswer Period due to lick?
                 if (strcmp(RestartPreAnsOnLick,'on'))
