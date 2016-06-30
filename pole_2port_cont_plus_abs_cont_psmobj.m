@@ -71,9 +71,6 @@ SoloParamHandle(obj, 'n_started_trials', 'value', 0);
 % History of hit/miss:
 SoloParamHandle(obj, 'hit_history', 'value', []);
 
-% next_side of trial:
-SoloParamHandle(obj, 'next_side', 'value', []);
-
 % History of EXACT zaber pole positions:
 SoloParamHandle(obj, 'pole_position_history', 'value', []);
 
@@ -92,11 +89,10 @@ npos=5; SoloParamHandle(obj, 'pole_position_list', 'value', cell(npos,1));
 
 
 
-
 % Every function will be able to read these, but only those explicitly
 % given r/w access will be able to modify them:
 DeclareGlobals(obj, 'ro_args', {'n_done_trials', 'n_started_trials', ...
-                    'hit_history', 'pole_position_history','next_side', 'pole_position_list',...
+                    'hit_history', 'pole_position_history', 'pole_position_list',...
                     'lickport_position_history','left_port_prob_history'});
 
 % Let RewardsSection, the part that parses what happened at the end of

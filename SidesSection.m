@@ -38,7 +38,7 @@
 %
 
 function [x, y] = SidesSection(obj, action, x, y)
-%global next_side %made 'next_side' global!!!-psm
+global next_side %made 'next_side' global!!!-psm
 GetSoloFunctionArgs;
 
 switch action
