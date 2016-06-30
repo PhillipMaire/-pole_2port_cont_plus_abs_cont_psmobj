@@ -342,7 +342,7 @@ switch action
                 % of left port, fL is fraction of left port correct and fR is
                 % fraction of right port trials correct.  Force 0 < pL < 1 and
                 % also note that must have 10 trials PER SIDE for this to work.
-            case 'probabalistic'
+           case 'probabalistic'
                 pickAtRandom = 1; % use it, but tweak it
                 nTrials = ntbc;
                 %nTrials value is defined by 'NumTrialsBiasCalc'-psm
@@ -359,8 +359,9 @@ switch action
                     %misses.
                     valL = find(hit_history(lT) >= 0);
                     valR = find(hit_history(rT) >= 0);
-                    valA = find(hit_history(aT) >= 0); %get all the absent
-                    %trials because there are no misses in this condition.
+                    valA = find(hit_history(aT) >-10);%only two conditions for
+                    %absent trials, lick or no lick. counting the no lick ie
+                    %correct rejections. no 'miss' trials here so ignore ==0
 
                     % enuff VALID trials per side? i.e. with lick
                     if (length(valL) >= nTrials && length(valR) >= nTrials && length(valA) >= nTrials)
@@ -391,46 +392,17 @@ switch action
                         %would be best to keep the bottom the same and create
                         %a separate probabalistic trainer for combined
                         %abscent and R L conditions
+                        FracCorrTot = fL+fR+fA/3;
 
                         % bias
-                        Ladjust = (fL - ((fR + fA)/2));
-                        Radjust = (fR - ((fL + fA)/2));
-                        Aadjust = (fA - ((fR + fL)/2));
-
-                        if Ladjust >= 0 ;
-                            lpp  = lpp - Ladjust*lpp;
-                        else lpp  = lpp - Ladjust*(1-lpp);
-                        end
-                        if Radjust >= 0 ;
-                            rpp  = rpp - Radjust*rpp;
-                        else rpp  = rpp - Radjust*(1-rpp);
-                        end
-                        if Aadjust >= 0 ;
-                            absp = absp - Aadjust*absp;
-                        else absp = absp - Aadjust*(1-absp);
-                        end
-                        totalP = lpp+rpp+absp;
-                        lpp  = lpp/totalP;
-                        rpp  = rpp/totalP
-                        absp = absp/totalP;
-
-
-                        %the below should never be used but keeping in just
-                        %in case
-                        if (lpp < 0) ; 
-                            lpp = 0; 
-                        elseif (lpp > 1-absp) ; 
-                            lpp = 1-absp ; 
-                        end
-                        if (rpp < 0) ; 
-                            rpp = 0; 
-                        elseif (rpp > 1-absp) ; 
-                            rpp = 1-absp ; 
-                        end
-                        %keeping above just in case
+                        lpp = lpp  - (fL - ((fR + fA)/2))/3;
+                        rpp = rpp  - (fR - ((fL + fA)/2))/3;
+                        absp= absp - (fA - ((fR + fL)/2))/3;
                         disp(['Using left probabiliy: ' num2str(lpp)]);
                         disp(['Using right probabiliy: ' num2str(rpp)]);
                         disp(['Using absent probabiliy: ' num2str(absp)]);
+                        if (lpp < 0) ; lpp = 0; elseif (lpp > 1-absp) ; lpp = 1-absp ; end
+                        if (rpp < 0) ; rpp = 0; elseif (rpp > 1-absp) ; rpp = 1-absp ; end
                     end
                 end
         end
