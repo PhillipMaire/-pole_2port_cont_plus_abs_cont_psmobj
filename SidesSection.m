@@ -400,7 +400,7 @@ switch action
                         absp= absp - (fA - ((fR + fL)/2))/3;
                         disp(['Using left probabiliy: ' num2str(lpp)]);
                         disp(['Using right probabiliy: ' num2str(rpp)]);
-                        disp(['Using absent probabiliy: ' num2str(absp)]);pause
+                        disp(['Using absent probabiliy: ' num2str(absp)]);
                         if (lpp < 0) ; lpp = 0; elseif (lpp > 1-absp) ; lpp = 1-absp ; end
                         if (rpp < 0) ; rpp = 0; elseif (rpp > 1-absp) ; rpp = 1-absp ; end
                     end
