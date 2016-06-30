@@ -22,7 +22,7 @@
       push_history(LastTrialEvents);
       LastTrialEvents.value = [];
       
-      if rows(pstruct.punish)>0 
+      if rows(pstruct.punish)>0 %if punish trial then...
           hit = 0;
           %this will work fine for the trial 'a' condition, just have to plot based on 
           %lick port and trial type-psm

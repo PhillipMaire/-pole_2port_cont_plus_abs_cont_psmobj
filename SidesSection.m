@@ -333,187 +333,242 @@ switch action
                             end
                         end
                     end
-                end
 
-                % no forcing? then random
-                if (length(next_side) == 0) ; pickAtRandom = 1; end
+                end    
+              
+              % - NO brutal side
+              else
+                  % first see if we force right
+                  if (length(rT) >= atme)
+                      hhR = hit_history(rT);
+                      val = find(hhR >= 0); % only consider lick trials
+                      if (length(val) >= atme) % enough licks?
+                          if (sum(hhR(val((end-atme+1):end))) == 0) % most recent all err?
+                              next_side = 'r'; % then we need to repeat right.
+                              brutal_side.value= 'r';
+                              disp('Brutal mode R');                              
+                          end
+                      end
+                  end
 
-                % -- Probabalistic: pL = pL - (fL-fR)/2, where pL is probabiltiy
-                % of left port, fL is fraction of left port correct and fR is
-                % fraction of right port trials correct.  Force 0 < pL < 1 and
-                % also note that must have 10 trials PER SIDE for this to work.
-            case 'probabalistic'
-                pickAtRandom = 1; % use it, but tweak it
-                nTrials = ntbc; % how many per side to use
-                %nTrials value is defined by 'NumTrialsBiasCalc'-psm
+                  % no decision? then see if force left
+                  if (length(next_side) == 0)
+                       if (length(lT) >= atme)
+                          if (length(hit_history) < max(lT))
+                              hit_history(max(lT)) = 0;
+                              disp('SidesSection::had to add a FALSE hit_history ; something was wrong.');
+                          end
+                          hhL = hit_history(lT);
+                          val = find(hhL >= 0); % only consider lick trials
+                          if (length(val) >= atme) % enough licks?
+                              if (sum(hhL(val((end-atme+1):end))) == 0) % most recent all err?
+                                  next_side = 'l'; % then we need to repeat left.
+                                  brutal_side.value = 'l';
+                                  disp('Brutal mode L');
+                              end
+                          end
+                      end
+                  end
+              end
+              
+              % no forcing? then random
+              if (length(next_side) == 0) ; pickAtRandom = 1; end
+              
+          % -- Probabalistic: pL = pL - (fL-fR)/2, where pL is probabiltiy
+          % of left port, fL is fraction of left port correct and fR is
+          % fraction of right port trials correct.  Force 0 < pL < 1 and
+          % also note that must have 10 trials PER SIDE for this to work.
+          case 'probabalistic'
+              pickAtRandom = 1; % use it, but tweak it
+              nTrials = ntbc; 
+              %nTrials value is defined by 'NumTrialsBiasCalc'-psm
+              
+              lT = find(previous_sides == 'l'); 
+              rT = find(previous_sides == 'r');
+              aT = find(previous_sides == 'a'); 
+              
+              %make sure there are enough trials first. -psm 
+              if (length(rT) >= nTrials && length(lT) >= nTrials && length(aT) >= nTrials)
+                  %correct trials (==1) and no lick trials (==0) for R and
+                  %L 
+                  %finds all correct and incorrect trials (skips over
+                  %misses.
+                  valL = find(hit_history(lT) >= 0);
+                  valR = find(hit_history(rT) >= 0);
+                  valA = find(hit_history(aT) >-10);%only two conditions for 
+                  %absent trials, lick or no lick. counting the no lick ie
+                  %correct rejections. no 'miss' trials here so ignore ==0
+                  
+                  % enuff VALID trials per side? i.e. with lick
+                  if (length(valL) >= nTrials && length(valR) >= nTrials && length(valA) >= nTrials)
+                      % restrict to nTrials
+                      %nTrials (NumTrialBiasCalc, set in gui)
+                      %finds the last nTrial of the correct/incorrect
+                      %trials for each side
+                      valL = valL(end-nTrials+1:end);
+                      valR = valR(end-nTrials+1:end);
+                      valA = valA(end-nTrials+1:end);
+                      % compute frac correct and no
+                      %lT(valL) are all correct or lick trials with  in the
+                      %designated trial window set by prob autotrianer
+                      %(default is 10). 
+                      fL = sum(hit_history(lT(valL)))/length(valL);
+                      fR = sum(hit_history(rT(valR)))/length(valR);
+                      fA = (sum(hit_history(aT(valA))))/(length(valA)*2); %divided by 2
+                      %so because corrRej are 2 so want to be only 1. 
+                      if fL == inf fL = 0; end
+                      if fR == inf fR = 0; end
+                      if fA == inf fA = 0; end
+                     
+                      %the way the autotrainer is set up is dependent only
+                      %on miss trials, which don't exist for A (abscent)
+                      %trials. so no need for abscent trials.-psm
+                      %wrong, actually it looks at just licks so you do
+                      %have to incorporate licks abs position in these, it
+                      %would be best to keep the bottom the same and create
+                      %a separate probabalistic trainer for combined
+                      %abscent and R L conditions
+                      FracCorrTot = fL+fR+fA/3;
+                  
+                      % bias
+                      lpp = lpp  - (fL - ((fR + fA)/2))/3;
+                      rpp = rpp  - (fR - ((fL + fA)/2))/3;
+                      absp= absp - (fA - ((fR + fL)/2))/3;
+                      disp(['Using left probabiliy: ' num2str(lpp)]);
+                      disp(['Using right probabiliy: ' num2str(rpp)]);
+                      disp(['Using absent probabiliy: ' num2str(absp)]);pause
+                      if (lpp < 0) ; lpp = 0; elseif (lpp > 1-absp) ; lpp = 1-absp ; end
+                      if (rpp < 0) ; rpp = 0; elseif (rpp > 1-absp) ; rpp = 1-absp ; end
+                  end
+              end
+      end
+      
+      %%%%%%%%%%%%%%%END OF AUTOTRAINER SWITCH%%%%%%%%%%%%%%%%
+      
+      % --- if you are to simply pick at random ...
+      %pickAtRandom is set to 1 when  autotrainer is off (or using probabalistic autotrainer
+      % which updates the lpp based on probabilitty), thus the
+      %below if statment just tests for autotrainer dropdown box selection
+      if(pickAtRandom)
+          MaxSameIndicator = 0; %0 means MaxSame not used to calculate next_side
+          brutal_side.value = ''; % in case there is something there
 
-                rT = find(previous_sides == 'r');
-                lT = find(previous_sides == 'l');
+          
+
+          % If MaxSame doesn't apply yet, choose at random
+          if value(MaxSame)==Inf || MaxSame > n_started_trials
+
+              %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%-psm
+              randVar=rand(1); %needs to be a variable so that it can be used in two
+              %consecutive if statemnts-psm
+              if randVar<=lpp, next_side = 'l';
+              elseif randVar>lpp && randVar<=lpp+rpp, next_side = 'r'; %psm
+              else next_side = 'a'; 
+              end;
+          else
+              %%%WARNINGS 
+              
+              if isinf(lpp/(rpp+absp))|| isinf(rpp/(lpp+absp))
+                  display(' ')
+                  display('WARNING RIGHT OR LEFT PROB IS 1, DEFAULT ALTERNATIVE IS ABSENT')
+                  display(' ')
+              elseif isinf(absp/(lpp+rpp))
+                  display(' ')
+                  display('WARNING ABSENT PROB IS 1, DEFAULT ALTERNATIVE IS RIGHT')
+                  display(' ')
+              end
+              % MaxSame applies, check for its rules:
+              % If there's been a string of MaxSame guys all the same, force change:
+              if all(previous_sides(n_started_trials-MaxSame+1:n_started_trials) == ...
+                      previous_sides(n_started_trials))
+                  MaxSameIndicator=1;%max same is used
+                  if previous_sides(n_started_trials)=='l'
+                      %%%%% takes care of max same by choosing one of the other
+                      %two variables based on their relitive probabilities
+                      %-psm
+                      if rand(1)<=rpp/(rpp+absp), next_side = 'r';
+                      else next_side = 'a';
+                      end
+                  elseif previous_sides(n_started_trials)=='r'
+                      if rand(1)<=lpp/(lpp+absp), next_side = 'l';
+                      else next_side = 'a';
+                      end
+                  elseif previous_sides(n_started_trials)=='a';
+                      if rand(1)<=lpp/(lpp+rpp), next_side = 'l';
+                      else next_side = 'r';
+                      end
+                  end;
+              else
+                  % Haven't reached MaxSame limits yet, choose at random:
+                  randVar=rand(1);
+                  if randVar<=lpp, next_side = 'l';
+                  elseif randVar>lpp && randVar<=lpp+rpp, next_side = 'r'; %psm
+                  else next_side = 'a';
+                  end;
+              end;
+          end;
+          
+          %%%%%%%%%%%%%%%%%%%%%%%%MAX SAME TWO START%%%%%%%%%%%%%%%%%%%
+          if MaxSameIndicator==0 && (value(MaxSameTwo)==Inf || MaxSameTwo > n_started_trials)
+              randVar=rand(1); %needs to be a variable so that it can be used in two
+              %consecutive if statemnts-psm
+              if randVar<=lpp, next_side = 'l';
+              elseif randVar>lpp && randVar<=lpp+rpp, next_side = 'r';
+              else next_side = 'a';
+              end;
+          elseif  value(MaxSameTwo)~=Inf && MaxSameTwo <= n_started_trials ...
+                  && numel(unique(previous_sides(n_started_trials-MaxSameTwo+1:n_started_trials))) ==2;
+              uniqueVar = unique(previous_sides(n_started_trials-MaxSameTwo+1:n_started_trials));
+              compVar = [97 108 114]; %char of 'a' 'l' and 'r' -psm
+              next_side = char(setdiff(compVar, uniqueVar));
+          elseif  value(MaxSameTwo)~=Inf && MaxSameTwo <= n_started_trials ...
+                  && numel(unique(previous_sides(n_started_trials-MaxSameTwo+1:n_started_trials))) ==1
+              uniqueVar = char(unique(previous_sides(n_started_trials-MaxSameTwo+1:n_started_trials)));
+              if uniqueVar=='l'
+                  if rand(1)<=rpp/(rpp+absp), next_side = 'r';
+                  else next_side = 'a';
+                  end
+              elseif uniqueVar=='r'
+                  if rand(1)<=lpp/(lpp+absp), next_side = 'l';
+                  else next_side = 'a';
+                  end
+              else %for 'a' trials
+                  if rand(1)<=lpp/(lpp+rpp), next_side = 'l';
+                  else next_side = 'r';
+                  end
+              end
+          elseif MaxSameIndicator==0  % Haven't reached MaxSameTwo and MaxSame doesn't apply then choose at random
+              randVar=rand(1);
+              if randVar<=lpp, next_side = 'l';
+              elseif randVar>lpp && randVar<=lpp+rpp, next_side = 'r';
+              else next_side = 'a';
+              end;
+          end;
+
+          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      end
 
 
-                %make sure there are enough trials first. -psm
-                if (length(rT) >= nTrials && length(lT) >= nTrials)
-                    %all lick trials
-                    valL = find(hit_history(lT) >= 0);
-                    valR = find(hit_history(rT) >= 0);
+    %  session_type = SessionTypeSection(obj,'get_session_type'); 
+      switch SessionType
+          
+          case {'Licking','Pole-conditioning'}
+            next_side = 'r'; % Make it always the go-trial position, so mouse doesn't have to unlearn anything.
+      end
 
-                    % enuff VALID trials per side? i.e. with lick
-                    if (length(valL) >= nTrials && length(valR) >= nTrials)
-                        % restrict to nTrials
-                        valL = valL(end-nTrials+1:end);
-                        valR = valR(end-nTrials+1:end);
-                        % compute frac correct
-                        %lT(valL) are all coorect or lick trials with  in the
-                        %designated trial window set by prob autotrianer
-                        %(default is 10).
-                        fL = sum(hit_history(lT(valL)))/length(valL);
-                        fR = sum(hit_history(rT(valR)))/length(valR);
-
-                        %the way the autotrainer is set up is dependent only
-                        %on miss trials, which don't exist for A (abscent)
-                        %trials. so no need for abscent trials.-psm
-                        %wrong, actually it looks at just licks so you do
-                        %have to incorporate licks abs position in these, it
-                        %would be best to keep the bottom the same and create
-                        %a separate probabalistic trainer for combined
-                        %abscent and R L conditions
-
-                        % bias
-                        lpp = lpp - ((fL - fR)/2);
-                        rpp = rpp - ((fR - fL)/2);
-                        disp(['Using left probabiliy: ' num2str(lpp)]);
-                        disp(['Using right probabiliy: ' num2str(rpp)]);
-                        if (lpp < 0) ; lpp = 0; elseif (lpp > 1-absp) ; lpp = 1-absp ; end
-                        if (rpp < 0) ; rpp = 0; elseif (rpp > 1-absp) ; rpp = 1-absp ; end
-                    end
-                end
-        end
-
-        %%%%%%%%%%%%%%%END OF AUTOTRAINER SWITCH%%%%%%%%%%%%%%%%
-
-        % --- if you are to simply pick at random ...
-        %pickAtRandom is set to 1 when  autotrainer is off (or using probabalistic autotrainer
-        % which updates the lpp based on probabilitty), thus the
-        %below if statment just tests for autotrainer dropdown box selection
-        if(pickAtRandom)
-            MaxSameIndicator = 0; %0 means MaxSame not used to calculate next_side
-            brutal_side.value = ''; % in case there is something there
-
-
-
-            % If MaxSame doesn't apply yet, choose at random
-            if value(MaxSame)==Inf || MaxSame > n_started_trials
-
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%-psm
-                randVar=rand(1); %needs to be a variable so that it can be used in two
-                %consecutive if statemnts-psm
-                if randVar<=lpp, next_side = 'l';
-                elseif randVar>lpp && randVar<=lpp+rpp, next_side = 'r'; %psm
-                else next_side = 'a';
-                end;
-            else
-                %%%WARNINGS
-
-                if isinf(lpp/(rpp+absp))|| isinf(rpp/(lpp+absp))
-                    display(' ')
-                    display('WARNING RIGHT OR LEFT PROB IS 1, DEFAULT ALTERNATIVE IS ABSENT')
-                    display(' ')
-                elseif isinf(absp/(lpp+rpp))
-                    display(' ')
-                    display('WARNING ABSENT PROB IS 1, DEFAULT ALTERNATIVE IS RIGHT')
-                    display(' ')
-                end
-                % MaxSame applies, check for its rules:
-                % If there's been a string of MaxSame guys all the same, force change:
-                if all(previous_sides(n_started_trials-MaxSame+1:n_started_trials) == ...
-                        previous_sides(n_started_trials))
-                    MaxSameIndicator=1;%max same is used
-                    if previous_sides(n_started_trials)=='l'
-                        %%%%% takes care of max same by choosing one of the other
-                        %two variables based on their relitive probabilities
-                        %-psm
-                        if rand(1)<=rpp/(rpp+absp), next_side = 'r';
-                        else next_side = 'a';
-                        end
-                    elseif previous_sides(n_started_trials)=='r'
-                        if rand(1)<=lpp/(lpp+absp), next_side = 'l';
-                        else next_side = 'a';
-                        end
-                    elseif previous_sides(n_started_trials)=='a';
-                        if rand(1)<=lpp/(lpp+rpp), next_side = 'l';
-                        else next_side = 'r';
-                        end
-                    end;
-                else
-                    % Haven't reached MaxSame limits yet, choose at random:
-                    randVar=rand(1);
-                    if randVar<=lpp, next_side = 'l';
-                    elseif randVar>lpp && randVar<=lpp+rpp, next_side = 'r'; %psm
-                    else next_side = 'a';
-                    end;
-                end;
-            end;
-
-            %%%%%%%%%%%%%%%%%%%%%%%%MAX SAME TWO START%%%%%%%%%%%%%%%%%%%
-            if MaxSameIndicator==0 && (value(MaxSameTwo)==Inf || MaxSameTwo > n_started_trials)
-                randVar=rand(1); %needs to be a variable so that it can be used in two
-                %consecutive if statemnts-psm
-                if randVar<=lpp, next_side = 'l';
-                elseif randVar>lpp && randVar<=lpp+rpp, next_side = 'r';
-                else next_side = 'a';
-                end;
-            elseif  value(MaxSameTwo)~=Inf && MaxSameTwo <= n_started_trials ...
-                    && numel(unique(previous_sides(n_started_trials-MaxSameTwo+1:n_started_trials))) ==2;
-                uniqueVar = unique(previous_sides(n_started_trials-MaxSameTwo+1:n_started_trials));
-                compVar = [97 108 114]; %char of 'a' 'l' and 'r' -psm
-                next_side = char(setdiff(compVar, uniqueVar));
-            elseif  value(MaxSameTwo)~=Inf && MaxSameTwo <= n_started_trials ...
-                    && numel(unique(previous_sides(n_started_trials-MaxSameTwo+1:n_started_trials))) ==1
-                uniqueVar = char(unique(previous_sides(n_started_trials-MaxSameTwo+1:n_started_trials)));
-                if uniqueVar=='l'
-                    if rand(1)<=rpp/(rpp+absp), next_side = 'r';
-                    else next_side = 'a';
-                    end
-                elseif uniqueVar=='r'
-                    if rand(1)<=lpp/(lpp+absp), next_side = 'l';
-                    else next_side = 'a';
-                    end
-                else %for 'a' trials
-                    if rand(1)<=lpp/(lpp+rpp), next_side = 'l';
-                    else next_side = 'r';
-                    end
-                end
-            elseif MaxSameIndicator==0  % Haven't reached MaxSameTwo and MaxSame doesn't apply then choose at random
-                randVar=rand(1);
-                if randVar<=lpp, next_side = 'l';
-                elseif randVar>lpp && randVar<=lpp+rpp, next_side = 'r';
-                else next_side = 'a';
-                end;
-            end;
-
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        end
-
-
-        %  session_type = SessionTypeSection(obj,'get_session_type');
-        switch SessionType
-
-            case {'Licking','Pole-conditioning'}
-                next_side = 'r'; % Make it always the go-trial position, so mouse doesn't have to unlearn anything.
-        end
-
-        % logging globals (also used sometmies)
-        previous_sides(n_started_trials+1) = next_side;
-
-        %I didn't update this because lpph or any of its related variabels don't
-        %seem to be saved, for example the lpph variable is a vector of 0's
-        %with the exception of its last added number which is the current lpp
-        %value. at this point I see no need to change any of this for right
-        %port. -psm
-        lpph = left_port_prob_history(:);
-        lpph(n_started_trials+1) = lpp;
-        if (size(lpph,1) == 1) ; lpph = lpph'; end
-        left_port_prob_history.value = [lpph];
+      % logging globals (also used sometmies)
+      previous_sides(n_started_trials+1) = next_side;
+     
+      %I didn't update this because lpph or any of its related variabels don't
+      %seem to be saved, for example the lpph variable is a vector of 0's 
+      %with the exception of its last added number which is the current lpp
+      %value. at this point I see no need to change any of this for right
+      %port. -psm 
+      lpph = left_port_prob_history(:);
+      lpph(n_started_trials+1) = lpp;
+      if (size(lpph,1) == 1) ; lpph = lpph'; end
+      left_port_prob_history.value = [lpph];
+      
 
     case 'get_next_side',   % --------- CASE GET_NEXT_SIDE ------
         if isempty(previous_sides)
