@@ -334,7 +334,7 @@ switch action
                         end
                     end
 
-                end    
+                    
               
               % - NO brutal side
               else
