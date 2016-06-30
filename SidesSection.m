@@ -75,7 +75,7 @@ switch action
         SoloFunctionAddVars('AnalysisSection', 'ro_args', 'brutal_side');
 
         % Autotrainer mode
-        MenuParam(obj, 'AutoTrainMode', {'Off', 'Probabalistic','Alternate','Brutal'}, ...
+        MenuParam(obj, 'AutoTrainMode', {'Off', 'Probabalistic','Alternate','r-abs_alternate', 'r-l_alternate','Brutal', }, ...
             'Off', x, y);
         next_row(y);
 
@@ -165,15 +165,68 @@ switch action
                 atmc = value(AutoTrainMinCorrect);
                 next_side = 'r';
 
-                % how many CORRECT licks in a row are we at?
+                % how many CORRECT licks in a row are there?
                 licks = find(hit_history == 1);
-                if (length(licks) >= atmc)
-                    last_side = previous_sides(licks(end));
+                corrRej = find(hit_history == 2);
+                allCorr = find(hit_history == 1 | hit_history == 2);
+                if (length(allCorr) >= atmc)
+                    last_side = previous_sides(allCorr(end));%last correct side
                     cmp_mat = repmat(last_side, 1,atmc);
 
                     % have we repeated last-side enough times?
-                    if (sum(previous_sides(licks((end-atmc+1):end)) == cmp_mat) == atmc)
-                        if (last_side == 'r') ; next_side = 'l'; end
+                    if (sum(previous_sides(allCorr((end-atmc+1):end)) == cmp_mat) == atmc)
+                        if (last_side == 'r') ; next_side = 'l';
+                        elseif (last_side == 'l') ; next_side = 'a';
+                        elseif (last_side == 'a') ; next_side = 'r';
+                        end
+                    else
+                        next_side = last_side;
+                    end
+                end
+
+                % -- Brutal: if animal makes MaxErrors in a row on either side,
+                % present only that side until animal makes minCorect correct
+                % responses
+            case 'r-abs_alternate'
+                atmc = value(AutoTrainMinCorrect);
+                next_side = 'r';
+
+                % how many CORRECT licks in a row are there?
+                licks = find(hit_history == 1);
+                corrRej = find(hit_history == 2);
+                allCorr = find(hit_history == 1 | hit_history == 2);
+                if (length(allCorr) >= atmc)
+                    last_side = previous_sides(allCorr(end));%last correct side
+                    cmp_mat = repmat(last_side, 1,atmc);
+
+                    % have we repeated last-side enough times?
+                    if (sum(previous_sides(allCorr((end-atmc+1):end)) == cmp_mat) == atmc)
+                        if (last_side == 'r') ; next_side = 'a';
+                        end
+                    else
+                        next_side = last_side;
+                    end
+                end
+
+                % -- Brutal: if animal makes MaxErrors in a row on either side,
+                % present only that side until animal makes minCorect correct
+                % responses
+            case 'r-l_alternate'
+                atmc = value(AutoTrainMinCorrect);
+                next_side = 'r';
+
+                % how many CORRECT licks in a row are there?
+                licks = find(hit_history == 1);
+                corrRej = find(hit_history == 2);
+                allCorr = find(hit_history == 1 | hit_history == 2);
+                if (length(allCorr) >= atmc)
+                    last_side = previous_sides(allCorr(end));%last correct side
+                    cmp_mat = repmat(last_side, 1,atmc);
+
+                    % have we repeated last-side enough times?
+                    if (sum(previous_sides(allCorr((end-atmc+1):end)) == cmp_mat) == atmc)
+                        if (last_side == 'r') ; next_side = 'l';
+                        end
                     else
                         next_side = last_side;
                     end
@@ -206,7 +259,7 @@ switch action
                     elseif (brutal_side == 'l')
                         hh = hit_history(lT);
                     else %'a'trail
-                        hh = hit_history(aT)/2;%divided by two to give 1's 
+                        hh = hit_history(aT)/2;%divided by two to give 1's
                         %and 0's. 2 is a correct rejection for 'a' trials
                     end
 
@@ -264,12 +317,12 @@ switch action
                                 disp('SidesSection::had to add a FALSE hit_history ; something was wrong.');
                                 pause(10)% added pause so we would notice this, should never happen
                                 %but keeping it consistant with previous
-                                %code -psm 
+                                %code -psm
                             end
                             hhA = hit_history(aT);
-                            hhA = hhA/2; %all the correct rejections are 2's so 
+                            hhA = hhA/2; %all the correct rejections are 2's so
                             %you have to divide the mat by to to get 1's
-                            %and 0's 
+                            %and 0's
                             val = find(hhA >= 0); % only consider lick trials
                             if (length(val) >= atme) % enough licks?
                                 if (sum(hhA(val((end-atme+1):end))) == 0) % most recent all err?
@@ -544,7 +597,7 @@ switch action
         xgreen   = find(hit_history == 1|hit_history==2);%2's are for the correct rejections of absent trials-psm
         lefts    = find(previous_sides(xgreen) == 'l');
         rghts    = find(previous_sides(xgreen) == 'r');
-        absents =find(previous_sides(xgreen) == 'a');
+        absents  = find(previous_sides(xgreen) == 'a');
 
 
         ygreen = zeros(size(xgreen)); ygreen(lefts) = 2;
