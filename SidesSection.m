@@ -267,33 +267,39 @@ function [x, y] = SidesSection(obj, action, x, y)
               nTrials = ntbc; 
               %nTrials value is defined by 'NumTrialsBiasCalc'-psm
               
-              rT = find(previous_sides == 'r');
               lT = find(previous_sides == 'l'); 
+              rT = find(previous_sides == 'r');
               aT = find(previous_sides == 'a'); 
               
               %make sure there are enough trials first. -psm 
               if (length(rT) >= nTrials && length(lT) >= nTrials && length(aT) >= nTrials)
                   %correct trials (==1) and no lick trials (==0) for R and
                   %L 
+                  %finds all correct and incorrect trials (skips over
+                  %misses.
                   valL = find(hit_history(lT) >= 0);
                   valR = find(hit_history(rT) >= 0);
-                  valA = find(hit_history(aT) == 2);%only two conditions for 
+                  valA = find(hit_history(aT) >-10);%only two conditions for 
                   %absent trials, lick or no lick. counting the no lick ie
                   %correct rejections. no 'miss' trials here so ignore ==0
                   
                   % enuff VALID trials per side? i.e. with lick
                   if (length(valL) >= nTrials && length(valR) >= nTrials && length(valA) >= nTrials)
                       % restrict to nTrials
+                      %nTrials (NumTrialBiasCalc, set in gui)
+                      %finds the last nTrial of the correct/incorrect
+                      %trials for each side
                       valL = valL(end-nTrials+1:end);
                       valR = valR(end-nTrials+1:end);
                       valA = valA(end-nTrials+1:end);
                       % compute frac correct and no
-                      %lT(valL) are all coorect or lick trials with  in the
+                      %lT(valL) are all correct or lick trials with  in the
                       %designated trial window set by prob autotrianer
                       %(default is 10). 
                       fL = sum(hit_history(lT(valL)))/length(valL);
                       fR = sum(hit_history(rT(valR)))/length(valR);
-                      fA = sum(hit_history(aT(valA)))/length(valA);
+                      fA = (sum(hit_history(aT(valA))))/(length(valA)*2); %divided by 2
+                      %so because corrRej are 2 so want to be only 1. 
                       if fL == inf fL = 0; end
                       if fR == inf fR = 0; end
                       if fA == inf fA = 0; end
@@ -306,16 +312,17 @@ function [x, y] = SidesSection(obj, action, x, y)
                       %would be best to keep the bottom the same and create
                       %a separate probabalistic trainer for combined
                       %abscent and R L conditions
-                      
+                      FracCorrTot = fL+fR+fA/3;
+                  
                       % bias
-                      lpp = lpp - ((fL - fR - fA)/3);
-                      rpp = rpp - ((fR - fL - fA)/3);
-                      absp= absp -((fA - fR - fL)/3);
+                      lpp = lpp  - (fL - ((fR + fA)/2))/3;
+                      rpp = rpp  - (fR - ((fL + fA)/2))/3;
+                      absp= absp - (fA - ((fR + fL)/2))/3;
                       disp(['Using left probabiliy: ' num2str(lpp)]);
                       disp(['Using right probabiliy: ' num2str(rpp)]);
-                      disp(['Using absent probabiliy: ' num2str(absp)]);
+                      disp(['Using absent probabiliy: ' num2str(absp)]);pause
                       if (lpp < 0) ; lpp = 0; elseif (lpp > 1-absp) ; lpp = 1-absp ; end
-                      if (rpp < 0) ; rpp = 0; elseif (rpp > 1-absp) ; rpp = 1-absp ; end)
+                      if (rpp < 0) ; rpp = 0; elseif (rpp > 1-absp) ; rpp = 1-absp ; end
                   end
               end
       end
