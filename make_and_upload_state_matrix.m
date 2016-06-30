@@ -121,7 +121,15 @@ switch action
             case 'Water-Valve-Calibration'
 
             case 'Manual-Training'
-               
+                %Lin     Lout  Rin Rout   Tup  Tim  Dou Aou  (Dou is bitmask format)
+
+                %            stm = [stm ;
+                %                b     b    b    b     35  .01      0         0  ; ... % wait for lick  (This is state 40)
+                %                b+1   b+1  b+1  b+1   35  lwvtm  wvLid     0  ; ... % licked left -- reward left
+                %                b+2   b+2  b+2  b+2   35  rwvtm  wvRid     0  ; ... % licked right -- reward right
+                %                ];
+                %            pause(20)
+                % ---- labeling of states
                 sBC = b; % bitcode
                 sPrTP = b+1; % pretrial pause
                 sPMS = b+2; % pole move & sample period

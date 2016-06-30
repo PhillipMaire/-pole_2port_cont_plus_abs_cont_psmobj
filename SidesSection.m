@@ -189,7 +189,7 @@ switch action
 
                 % do we have enough CONSECUTIVE errors on eitherside
                 % (consider only licks, not misses)
-                cmp_mat = repmat(2,1,atme);%1 row by atme columns of 2's
+                cmp_mat = repmat(2,1,atme);%1 row by atme column of 2's
                 rT = find(previous_sides == 'r');
                 lT = find(previous_sides == 'l');
                 aT = find(previous_sides == 'a');
