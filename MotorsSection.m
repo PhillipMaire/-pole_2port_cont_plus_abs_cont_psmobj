@@ -134,24 +134,24 @@ switch action
         
         %--------------- extreme positions for the multi-pole task --------------------------------
         next_row(y);
-        NumeditParam(obj, 'no_pole_position_ant', 180000, x, y, 'label', ...
+        NumeditParam(obj, 'l_port_ant', 120000, x, y, 'label', ...
             'L-port ant','TooltipString','left port anterior');
         
         next_row(y);
-        NumeditParam(obj, 'no_pole_position_pos', 100001, x, y, 'label', ...
+        NumeditParam(obj, 'l_port_post', 150000, x, y, 'label', ...
             'L-port post','TooltipString','left port posterior');
         
         next_row(y);
-        NumeditParam(obj, 'yes_pole_position_ant', 100000, x, y, 'label', ...
+        NumeditParam(obj, 'r_port_ant', 50000, x, y, 'label', ...
             'R-port ant','TooltipString','right port anterior');        
         
         next_row(y);
-        NumeditParam(obj, 'yes_pole_position_pos', 20000, x, y, 'label', ...
+        NumeditParam(obj, 'r_port_post', 80000, x, y, 'label', ...
             'R-port post','TooltipString','right port posterior');
         %%%psm below 
         next_row(y);
-        NumeditParam(obj, 'Absent_pole_position', 180000, x, y, 'label', ...
-            '"Absent" lat position','TooltipString','out of range anterior trial.');        
+        NumeditParam(obj, 'Absent_pole_position', 0, x, y, 'label', ...
+            'Absent lat position','TooltipString','out of range anterior trial.');        
         
         %%%psm above
 % 
@@ -176,7 +176,7 @@ switch action
         set_callback(read_lateral_positions, {mfilename, 'read_lateral_positions'});
 
         next_row(y);
-        NumeditParam(obj, 'lateral_motor_position', 180000, x, y, 'label', ...
+        NumeditParam(obj, 'lateral_motor_position', 100000, x, y, 'label', ...
             'lateral_motor_position','TooltipString','Absolute position in microsteps of motor.');
         set_callback(lateral_motor_position, {mfilename, 'lateral_motor_position'});
 
@@ -198,21 +198,21 @@ switch action
        
 
             if next_side == 'r'
-                next_pole_position = value(round(rand*(yes_pole_position_ant - yes_pole_position_pos)+yes_pole_position_pos));
+                next_pole_position = value(round(rand*(r_port_ant - r_port_post)+r_port_post));
             elseif next_side == 'l'
-                next_pole_position = value(round(rand*(no_pole_position_ant - no_pole_position_pos)+no_pole_position_pos));
+                next_pole_position = value(round(rand*(l_port_ant - l_port_post)+l_port_post));
             elseif next_side == 'a'%-psm
                 if rand(1)>=.5; %chooses randomly which pole position to mimic, note that the probabilites are 
                     %not dependent on the probabilities of left port or right port. but just random
-                next_pole_position = value(round(rand*(yes_pole_position_ant - yes_pole_position_pos)+yes_pole_position_pos));
+                next_pole_position = value(round(rand*(r_port_ant - r_port_post)+r_port_post));
                 else
-                next_pole_position = value(round(rand*(no_pole_position_ant - no_pole_position_pos)+no_pole_position_pos)); 
+                next_pole_position = value(round(rand*(l_port_ant - l_port_post)+l_port_post)); 
                 end
                 else%psm
                 error('un-recognized type for next_side');
             end
 
-            half_point     = round(value(no_pole_position_pos+yes_pole_position_ant)/2);%#
+            half_point     = round(value(l_port_post+r_port_ant)/2);%#
             half_point_lat = round(value(lateral_motor_position+Absent_pole_position)/2);%#
             if  next_side == 'a'%-psm
                 %we havce to ahve something that knows the set lateral position  lateral_motor_position
@@ -263,11 +263,11 @@ switch action
         return;
 
     case 'get_yes_pole_position_easy'
-        x = value(yes_pole_position_ant);
+        x = value(r_port_ant);
         return
 
     case 'get_no_pole_position_easy'
-        x = value(no_pole_position_pos);
+        x = value(l_port_post);
         return
 
     case 'get_num_of_pole_position'
