@@ -555,15 +555,15 @@ switch action
                         %%%%%this allows max same to be used with the
                         %%%%%variable twoProb autotrainer
                         if ONEpp == 1
-                            ONEpp = ONEpp - .0001;
+                            ONEpp = ONEpp - .00005;
                         elseif ONEpp == 0
-                            ONEpp = ONEpp + .0001;
+                            ONEpp = ONEpp + .00005;
                         end
 
                         if TWOpp == 1
-                            TWOpp = TWOpp - .0001;
+                            TWOpp = TWOpp - .00005;
                         elseif TWOpp == 0
-                            TWOpp = TWOpp + .0001;
+                            TWOpp = TWOpp + .00005;
                         end
                         %%%%%
                         if     condition == 1
