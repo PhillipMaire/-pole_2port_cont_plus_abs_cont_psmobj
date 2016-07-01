@@ -74,8 +74,9 @@ switch action
         % Give read-only access to AnalysisSection.m:
         SoloFunctionAddVars('AnalysisSection', 'ro_args', 'brutal_side');
 
+
         % Autotrainer mode
-        MenuParam(obj, 'AutoTrainMode', {'Off', 'Probabalistic','Alternate','r-abs_alternate', 'r-l_alternate','Brutal', }, ...
+        MenuParam(obj, 'AutoTrainMode', {'Off', 'Probabalistic', 'Two_Probabalistic','Alternate','R-Abs_alternate', 'R-L_alternate','Brutal', }, ...
             'Off', x, y);
         next_row(y);
 
@@ -417,19 +418,168 @@ switch action
 
                         %the below should never be used but keeping in just
                         %in case
-                        if (lpp < 0) ; 
-                            lpp = 0; 
-                        elseif (lpp > 1-absp) ; 
-                            lpp = 1-absp ; 
+                        if (lpp < 0);
+                            lpp = 0;
+                        elseif (lpp > 1-absp) ;
+                            lpp = 1-absp ;
                         end
-                        if (rpp < 0) ; 
-                            rpp = 0; 
-                        elseif (rpp > 1-absp) ; 
-                            rpp = 1-absp ; 
+                        if (rpp < 0) ;
+                            rpp = 0;
+                        elseif (rpp > 1-absp) ;
+                            rpp = 1-absp ;
                         end
                         %keeping above just in case
-                        disp(['Using left probabiliy: ' num2str(lpp)]);
-                        disp(['Using right probabiliy: ' num2str(rpp)]);
+                        
+                        %%%%%below accountd for max same defaulting to
+                        %%%%%certain trials when two prob == 0 and one == 1
+                        %%%%%this allows max same to be used with the
+                        %%%%%variable twoProb autotrainer
+                        if rpp == 1 
+                            rpp   = .9999;
+                            lpp   = .00005;
+                            absps = .00005;
+                        end
+                        
+                        if lpp == 1 
+                            rpp   = .00005;
+                            lpp   = .9999;
+                            absps = .00005;
+                        end
+                        
+                        if absp == 1 
+                            rpp   = .00005;
+                            lpp   = .00005;
+                            absps = .9999;
+                        end
+                        %%%%%
+                        
+                        disp(['Using left probabiliy:   ' num2str(lpp)]);
+                        disp(['Using right probabiliy:  ' num2str(rpp)]);
+                        disp(['Using absent probabiliy: ' num2str(absp)]);
+                    end
+                end
+
+            case 'two_probabalistic'
+                pickAtRandom = 1; % use it, but tweak it
+                nTrials = ntbc;
+                %nTrials value is defined by 'NumTrialsBiasCalc'-psm
+                if lpp == 0
+                    trialTypeOne = find(previous_sides == 'a');
+                    trialTypeTwo = find(previous_sides == 'r');
+                    ONEpp = absp;
+                    TWOpp = rpp;
+                    condition = 1;
+                elseif rpp == 0
+                    trialTypeOne = find(previous_sides == 'a');
+                    trialTypeTwo = find(previous_sides == 'l');
+                    ONEpp = absp;
+                    TWOpp = lpp;
+                    condition = 2;
+                elseif absp == 0
+                    trialTypeOne = find(previous_sides == 'r');
+                    trialTypeTwo = find(previous_sides == 'l');
+                    ONEpp = rpp;
+                    TWOpp = lpp;
+                    condition = 3;
+                else %default to left right
+                    display ('there isnt a zero probability, default to left right')
+                    trialTypeOne = find(previous_sides == 'r');
+                    trialTypeTwo = find(previous_sides == 'l');
+                    ONEpp = rpp;
+                    TWOpp = lpp;
+                    condition = 3;
+                    absp =0;
+                end
+               
+
+                %make sure there are enough trials first. -psm
+                if (length(trialTypeOne) >= nTrials && length(trialTypeOne) >= nTrials)
+                    %correct trials (==1) and no lick trials (==0) for R and
+                    %L
+                    %finds all correct and incorrect trials (skips over
+                    %misses.
+                    valtrialTypeOne = find(hit_history(trialTypeOne) >= 0);
+                    valtrialTypeTwo = find(hit_history(trialTypeTwo) >= 0);
+
+
+                    % enuff VALID trials per side? i.e. with lick
+                    if (length(valtrialTypeOne) >= nTrials && length(valtrialTypeTwo) >= nTrials)
+                        % restrict to nTrials
+                        %nTrials (NumTrialBiasCalc, set in gui)
+                        %finds the last nTrial of the correct/incorrect
+                        %trials for each side
+                        valtrialTypeOne = valtrialTypeOne(end-nTrials+1:end);
+                        valtrialTypeTwo = valtrialTypeTwo(end-nTrials+1:end);
+                        % compute frac correct and no
+                        %lT(valtrialTypeOne) are all correct or lick trials with  in the
+                        %designated trial window set by prob autotrianer
+                        %(default is 10).
+                        fONE = sum(hit_history(trialTypeOne(valtrialTypeOne)))/length(valtrialTypeOne);
+                        fTWO = sum(hit_history(trialTypeTwo(valtrialTypeTwo)))/length(valtrialTypeTwo);
+                        if fONE == inf; fONE = 0; end
+                        if fTWO == inf; fTWO = 0; end
+
+                        % bias
+                        ONEadjust = fONE - fTWO;
+                        TWOadjust = fTWO - fONE;
+
+                        if ONEadjust >= 0 ;
+                            ONEpp  = ONEpp - ONEadjust*ONEpp;
+                        else ONEpp  = ONEpp - ONEadjust*(1-ONEpp);
+                        end
+                        if TWOadjust >= 0 ;
+                            TWOpp  = TWOpp - TWOadjust*TWOpp;
+                        else TWOpp  = TWOpp - TWOadjust*(1-TWOpp);
+                        end
+                        totalP = ONEpp+TWOpp;
+                        ONEpp  = ONEpp/totalP;
+                        TWOpp  = TWOpp/totalP;
+                        
+
+                        %the below should never be used but keeping in just
+                        %in case
+                        
+                        if (ONEpp < 0) ;
+                            ONEpp = 0;
+                        elseif (ONEpp > 1) ;
+                            ONEpp = 1;
+                        end
+                        if (TWOpp < 0) ;
+                            TWOpp = 0;
+                        elseif (TWOpp > 1) ;
+                            TWOpp = 1 ;
+                        end
+
+                        %%%%%below accountd for max same defaulting to
+                        %%%%%certain trials when two prob == 0 and one == 1
+                        %%%%%this allows max same to be used with the
+                        %%%%%variable twoProb autotrainer
+                        if ONEpp == 1
+                            ONEpp = ONEpp - .0001;
+                        elseif ONEpp == 0
+                            ONEpp = ONEpp + .0001;
+                        end
+
+                        if TWOpp == 1
+                            TWOpp = TWOpp - .0001;
+                        elseif TWOpp == 0
+                            TWOpp = TWOpp + .0001;
+                        end
+                        %%%%%
+                        if     condition == 1
+                            absp = ONEpp;
+                            rpp  = TWOpp;
+                        elseif condition == 2
+                            absp = ONEpp;
+                            lpp  = TWOpp;
+                        elseif condition == 3
+                            rpp  = ONEpp;
+                            lpp  = TWOpp;
+                        end
+                        
+                        %keeping above just in case
+                        disp(['Using left probabiliy:   ' num2str(lpp)]);
+                        disp(['Using right probabiliy:  ' num2str(rpp)]);
                         disp(['Using absent probabiliy: ' num2str(absp)]);
                     end
                 end
@@ -508,6 +658,8 @@ switch action
                 elseif randVar>lpp && randVar<=lpp+rpp, next_side = 'r';
                 else next_side = 'a';
                 end;
+                randVar
+                next_side
             elseif  value(MaxSameTwo)~=Inf && MaxSameTwo <= n_started_trials ...
                     && numel(unique(previous_sides(n_started_trials-MaxSameTwo+1:n_started_trials))) ==2;
                 uniqueVar = unique(previous_sides(n_started_trials-MaxSameTwo+1:n_started_trials));
