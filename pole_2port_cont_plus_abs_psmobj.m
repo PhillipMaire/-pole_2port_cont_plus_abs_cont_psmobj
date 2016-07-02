@@ -1,4 +1,4 @@
-function [obj] = pole_2port_cont_plus_abs_cont_psmobj(name)
+function [obj] = pole_2port_cont_plus_abs_psmobj(name)
     
 % -------- BEGIN Magic code that all protocol objects must have ---
 %

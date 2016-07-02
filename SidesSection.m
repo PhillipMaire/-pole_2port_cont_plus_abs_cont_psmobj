@@ -77,9 +77,8 @@ switch action
 
         % Autotrainer mode
         MenuParam(obj, 'AutoTrainMode', {'Off', 'Probabalistic', 'Two_Probabalistic','Alternate','R-Abs_alternate', 'R-L_alternate','Brutal', }, ...
-            'Off', x, y);
+            'Off', x, y,'TooltipString','for Two_probabilistic, set prob of two trial types to equal 1 to set two trial types used.');
         next_row(y);
-
         % Allow animal to correct reward from CORRECT port even if incorrect
         % port was licked?
         MenuParam(obj, 'RewardOnWrong', {'yes','no'}, ...
