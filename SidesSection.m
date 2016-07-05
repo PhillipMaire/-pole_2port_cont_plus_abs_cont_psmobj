@@ -657,8 +657,6 @@ switch action
                 elseif randVar>lpp && randVar<=lpp+rpp, next_side = 'r';
                 else next_side = 'a';
                 end;
-                randVar
-                next_side
             elseif  value(MaxSameTwo)~=Inf && MaxSameTwo <= n_started_trials ...
                     && numel(unique(previous_sides(n_started_trials-MaxSameTwo+1:n_started_trials))) ==2;
                 uniqueVar = unique(previous_sides(n_started_trials-MaxSameTwo+1:n_started_trials));

@@ -162,7 +162,7 @@ switch action
                         maxValuePAT = str2num(pa_t(comIdx+1:end-1));
                         pa_t = minValuePAT + ((maxValuePAT-minValuePAT)*rand(1));
                     else
-                        disp('Bad format ; settig PreAnswerTime to 0');
+                        disp('Bad format ; setting PreAnswerTime to 0');
                         pa_t= 0;
                     end
                 end
@@ -389,7 +389,7 @@ switch action
                 else next_side=='a'; %for absent condition -psm
                     onlickL = sPun;
                     onlickR = sPun;
-                    water_t = 0;
+                    water_t = 0.01;
                 end
 
                 % Disable reward?  If so, do it by setting wv
