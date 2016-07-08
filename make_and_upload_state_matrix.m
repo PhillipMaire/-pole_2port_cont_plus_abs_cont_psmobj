@@ -57,15 +57,17 @@ switch action
         %
         % Settings S. Peron
         wvLid = 2^7; % water valve (left) % CHANGE PER BOX!!!!
-        ledLid = 2^1; % lickport LED (left)
+%         ledLid = 2^1; % lickport LED (left)
         wvRid = 2^6; % water valve (right) % CHANGE PER BOX!!!!
-        ledRid = 2^1; % lickport LED (right)
+%         ledRid = 2^1; % lickport LED (right)
         pvid = 2^2; % Pneumatic (Festo) valve ID.
         etid = 2^4; % EPHUS (electrophysiology) trigger ID.
         slid = 2^5; % Signal line for signaling trial numbers and fiducial marks.
-        rcid = 2^3; % Reward cue ID (sound)
-        absentNoRewid= 2^8;
-        puffid = 0; % Airpuff valve ID. DISABLED
+%         rcid = 2^3; % Reward cue ID (sound)
+        absentNoRewid= 2^3;%MAKE SURE THIS ISN'T BEING USED SO IT DOES NOTHING
+%         puffid = 0; % Airpuff valve ID. DISABLED
+        sSound1 = 2^0; %sound1 for absent trial licks (stop licking indicator)
+        sSound2 = 2^1; %sound2 for answer period indicator
 
         rwvtm = RWaterValveTime; % Defined in ValvesSection.m.
         lwvtm = LWaterValveTime; % Defined in ValvesSection.m.
@@ -127,7 +129,6 @@ switch action
                 sPMS = b+2; % pole move & sample period
                 sPrAP = b+3; % preanswer pause
                 sLoMi = b+4; % log miss/ignore
-                sLoCR = b+18; %testingpsm %log correct rejection
                 sPoTP = b+5; % posttrial pause
                 sPun = b+6; % punish (be it airpuff, timeout, or whatev)
                 sRwL = b+7; % reward left
@@ -148,7 +149,7 @@ switch action
                 rc_t = RewardCueTime;
                 rcoll_t = RewardCollectTime;
                 lpt_t = LickportTravelTime;
-                msp_t = ManualSamplingPeriod;
+                msp_t = ManualSampPeriod;
 
                 puff_t = AirpuffTime;
 
@@ -311,7 +312,6 @@ switch action
                 sPMS = b+2; % pole move & sample period
                 sPrAP = b+3; % preanswer pause
                 sLoMi = b+4; % log miss/ignore
-                sLoCR = b+18; %testingpsm %log correct rejection
                 sPoTP = b+5; % posttrial pause
                 sPun = b+6; % punish (be it airpuff, timeout, or whatev)
                 sRwL = b+7; % reward left
@@ -377,19 +377,37 @@ switch action
                 % Adjust extra time out basd on airpuf tmie
                 eto_t = eto_t - puff_t;
                 eto_t = max(eto_t,.01);
-
+             
+                if strcmp(BeepOn, 'all_wrong')
+                    LRset  = 53;% 53 is the sound cue
+                    ABSset = 53;% 46 is punish -psm
+                    
+                elseif strcmp(BeepOn, 'abs_wrong')
+                    LRset  = 46;
+                    ABSset = 53;
+                elseif strcmp(BeepOn, 'l-r_wrong')
+                    LRset  = 53;
+                    ABSset = 46;
+                elseif strcmp(BeepOn, 'off')
+                    LRset  = 46;
+                    ABSset = 46;
+                end
+                    
                 if next_side=='r'; % 'r' means right trial.
-                    onlickL = sPun; % incorrect
+                    onlickL = LRset; % incorrect
                     onlickR = sRwR; % correct
                     water_t = RWaterValveTime; % Defined in ValvesSection.m.
+                    restartState = LRset;
                 elseif next_side=='l'; %left
-                    onlickR = sPun; % punish
+                    onlickR = LRset; % punish
                     onlickL = sRwL; % water to left port
                     water_t = LWaterValveTime; % Defined in ValvesSection.m.
+                    restartState = LRset; 
                 else next_side=='a'; %for absent condition -psm
-                    onlickL = sPun;
-                    onlickR = sPun;
+                    onlickL = ABSset; % 53 for sound cue dependent on absent trial
+                    onlickR = ABSset;
                     water_t = 0.01;
+                    restartState = ABSset; 
                 end
 
                 % Disable reward?  If so, do it by setting wv
@@ -411,8 +429,10 @@ switch action
                     rewVid=wvLid;
                 elseif onlickR==46 && onlickL==46
                     rewVid=absentNoRewid;
+                elseif onlickR==53 && onlickL==53
+                    rewVid=absentNoRewid;
                 else
-                    error('L or R port id not 47 or 48 check make and upload state matrix')
+                    error('L or R port id not 46 or 47 or 48 or 53 check make and upload state matrix')
                 end
 
 
@@ -426,21 +446,23 @@ switch action
                 stm = [stm ;
                     %LinSt   LoutSt   RinSt    RoutSt   TimeupSt Time      Dou      Aou  (Dou is bitmask format)
                     % line b (sBC = b)
-                    sBC      sBC      sBC      sBC      101      .01         etid              0; ... %40 send bitcode
-                    sPrTP    sPrTP    sPrTP    sPrTP    sPMS     prep_t      0                 0; ... %41 pretrial pause %Possibly sPMS -> sAns
-                    onLickS  onLickS  onLickS  onLickS  sPrAP    pr_t+sp_t   pvid              0; ... %42 Preanswer Pause
-                    onlickL  onlickL  onlickR  onlickR  sLoMi    ap_t        pvid              0; ... %43 Check if correct lick
-                    sLoMi    sLoMi    sLoMi    sLoMi    sPoTP    0.001       0                 0; ... %44 log miss/ignore
-                    sPoTP    sPoTP    sPoTP    sPoTP    35       postp_t     0                 0; ... %45 posttrial pause
-                    onLickP  onLickP  onLickP  onLickP  pps      eto_t       pvid              0; ... %46 punish
-                    sRwL     sRwL     sRwL     sRwL     sRCol    water_t     pvid+wvLid        0; ... %47 reward left
-                    sRwR     sRwR     sRwR     sRwR     sRCol    water_t     pvid+wvRid        0; ... %48 reward right
-                    sRCaT    sRCaT    sRCaT    sRCaT    sPoTP    0.001       pvid              0; ... %49 to log unrewarded correct trials
-                    sRCol    sRCol    sRCol    sRCol    sPoTP    rcoll_t     pvid              0; ... %50 give animal time to collect reward
-                    sRDel    sRDel    sRDel    sRDel    sPun     0.001       pvid              0; ... %51 restart delay
-                    52       52       52       52       sRCol    water_t     pvid+rewVid       0; ... %52 reward correct port
+                    sBC      sBC      sBC      sBC      101            .01         etid              0; ... %40 send bitcode
+                    sPrTP    sPrTP    sPrTP    sPrTP    sPMS           prep_t      0                 0; ... %41 pretrial pause %Possibly sPMS -> sAns
+                    onLickS  onLickS  onLickS  onLickS  54             pr_t+sp_t   pvid              0; ... %42 Preanswer Pause
+                    onlickL  onlickL  onlickR  onlickR  sLoMi          ap_t        pvid              0; ... %43 Check if correct lick
+                    sLoMi    sLoMi    sLoMi    sLoMi    sPoTP          0.001       0                 0; ... %44 log miss/ignore
+                    sPoTP    sPoTP    sPoTP    sPoTP    35             postp_t     0                 0; ... %45 posttrial pause
+                    onLickP  onLickP  onLickP  onLickP  pps            eto_t       pvid              0; ... %46 punish
+                    sRwL     sRwL     sRwL     sRwL     sRCol          water_t     pvid+wvLid        0; ... %47 reward left
+                    sRwR     sRwR     sRwR     sRwR     sRCol          water_t     pvid+wvRid        0; ... %48 reward right
+                    sRCaT    sRCaT    sRCaT    sRCaT    sPoTP          0.001       pvid              0; ... %49 to log unrewarded correct trials
+                    sRCol    sRCol    sRCol    sRCol    sPoTP          rcoll_t     pvid              0; ... %50 give animal time to collect reward
+                    sRDel    sRDel    sRDel    sRDel    restartState   0.001       pvid              0; ... %51 restart delay
+                    52       52       52       52       sRCol          water_t     pvid+rewVid       0; ... %52 reward correct port
+                    53       53       53       53       sPun           0.001       pvid+sSound1      0; ... %53 lick on incorrect sound
+                    54       54       54       54       sPrAP          0.001       pvid+sSound2      0; ... %54 answer period sound cue
+                    
                     ];
-
 
                 trialnum = n_done_trials + 1;
 
