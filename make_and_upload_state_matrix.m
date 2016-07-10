@@ -193,7 +193,9 @@ switch action
                 onLickS = sPMS;%helps define if there is lick during the sample period.
 
                 % Adjust extra time out basd on airpuf tmie
-                eto_t = eto_t - puff_t;
+%                 eto_t = eto_t - puff_t; %%%%tooke this out because dont
+%                 use puff anymore, used 1 ms 0.001 time of the trigger for
+%                 sound cue/restart time instead
                 eto_t = max(eto_t,.01);
 
                 if next_side=='r'; % 'r' means right trial.
@@ -253,7 +255,7 @@ switch action
                     sRwR     sRwR     sRwR     sRwR     sRCol    water_t    pvid+wvRid        0; ... %48 reward right
                     sRCaT    sRCaT    sRCaT    sRCaT    sPoTP    0.001      pvid              0; ... %49 to log unrewarded correct trials
                     sRCol    sRCol    sRCol    sRCol    sPoTP    rcoll_t    pvid              0; ... %50 give animal time to collect reward
-                    sRDel    sRDel    sRDel    sRDel    sPun     0.001      pvid              0; ... %51 restart delayy
+                    sRDel    sRDel    sRDel    sRDel    sPun     0.001      pvid              0; ... %51 restart delay
                     52       52       52       52       sRCol    water_t    pvid+rewVid       0; ... %52 reward correct port
                     ];
 
@@ -444,7 +446,7 @@ switch action
                 end
 
                 stm = [stm ;
-                    %LinSt   LoutSt   RinSt    RoutSt   TimeupSt Time      Dou      Aou  (Dou is bitmask format)
+                    %LinSt   LoutSt   RinSt    RoutSt   TimeupSt       Time      Dou      Aou  (Dou is bitmask format)
                     % line b (sBC = b)
                     sBC      sBC      sBC      sBC      101            .01         etid              0; ... %40 send bitcode
                     sPrTP    sPrTP    sPrTP    sPrTP    sPMS           prep_t      0                 0; ... %41 pretrial pause %Possibly sPMS -> sAns
