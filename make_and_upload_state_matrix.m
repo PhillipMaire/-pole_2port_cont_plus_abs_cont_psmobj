@@ -461,8 +461,8 @@ switch action
                     sRCol    sRCol    sRCol    sRCol    sPoTP          rcoll_t     pvid              0; ... %50 give animal time to collect reward
                     sRDel    sRDel    sRDel    sRDel    restartState   0.001       pvid              0; ... %51 restart delay
                     52       52       52       52       sRCol          water_t     pvid+rewVid       0; ... %52 reward correct port
-                    53       53       53       53       sPun           0.001       pvid+sSound1      0; ... %53 lick on incorrect sound
-                    54       54       54       54       sPrAP          0.001       pvid+sSound2      0; ... %54 answer period sound cue
+                    53       53       53       53       sPun           0.005       pvid+sSound1      0; ... %53 lick on incorrect sound
+                    54       54       54       54       sPrAP          0.005       pvid+sSound2      0; ... %54 answer period sound cue
                     
                     ];
 
