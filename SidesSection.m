@@ -76,7 +76,7 @@ switch action
         SoloFunctionAddVars('AnalysisSection', 'ro_args', 'brutal_side_two');
 
         % Autotrainer mode
-        MenuParam(obj, 'AutoTrainMode', {'Off', 'Probabalistic', 'Two_Probabalistic','Alternate','R-Abs_alternate', 'R-L_alternate','Brutal','Two_Brutal_Set_Prob' }, ...
+        MenuParam(obj, 'AutoTrainMode', {'Off', 'Probabalistic', 'Two_Probabalistic', 'Alternate_Custom', 'Alternate','R-Abs_alternate', 'R-L_alternate','Brutal','Two_Brutal_Set_Prob' }, ...
             'Off', x, y,'TooltipString','for Two_probabilistic, set prob of two trial types to equal 1 to set two trial types used.');
         next_row(y);
         % Allow animal to correct reward from CORRECT port even if incorrect
@@ -102,7 +102,18 @@ switch action
         next_row(y, 1);
         NumeditParam(obj, 'RightPortProb', 0.4, x, y);
         next_row(y, 1);
+        
+        
+        
+        gui_position('set_width', 33);
+        NumeditParam(obj, 'L__alternate', 2, x, y, 'labelfraction', 0.25);
+        NumeditParam(obj, 'R__alternate', 2, x+33, y, 'labelfraction', 0.25);
+        gui_position('set_width', 133);
+        NumeditParam(obj, 'A__alternate', 1, x+66, y, 'labelfraction', 0.75);
+         next_row(y, 1);
+        gui_position('reset_width')
 
+        
         %have to set so that
         %if RightPortProb(1)+LeftPortProb(1)+OutReachProb(1)~=1
         %based on most recent updated gui of these three -psm
@@ -161,6 +172,41 @@ switch action
                 % -- Alternate: simple autotrainer where, after
                 % AutoTrainMinCorrect licks are made, the autotrainer switches to
                 %  the other side ; default is right
+            case 'alternate_custom'
+                altSeq = '';
+                seqSet = [L__alternate(:),R__alternate(:),A__alternate(:)];
+                
+                if  length(find(seqSet)) <= 1 
+                 disp('MUST HAVE AT LEAST 2 ALTERNATE NUMS SET')
+                 disp('default to L R A')
+                 altSeq ='lra'
+                elseif length(find(seqSet<0)) > 0 
+                 disp('ALTERNATE NUMS SET CAN''T BE NEGATIVE')
+                 disp('default to L R A')
+                 altSeq ='lra'
+                else
+                
+                if L__alternate(:)>0
+                    altSeq (    1:L__alternate(:)) = 'l';
+                end
+                if R__alternate(:)>0 && length(altSeq) == 0
+                    altSeq (    1:R__alternate(:)) = 'r';
+                else
+                    altSeq (end+1:end+R__alternate(:)) = 'r';
+                end
+                if A__alternate(:)>0
+                    altSeq (end+1:end+A__alternate(:)) = 'a';
+                end
+                end
+              
+                altSeq
+                var=(length(hit_history))-floor(length(hit_history)/length(altSeq))*length(altSeq)
+                if var == 0 
+                    var = length(altSeq)
+                end
+                next_side = altSeq(var)
+                next_side = char(next_side)
+               
             case 'alternate'
                 atmc = value(AutoTrainMinCorrect);
                 next_side = 'r';
