@@ -109,7 +109,7 @@ switch action
         NumeditParam(obj, 'L__alternate', 2, x, y, 'labelfraction', 0.25);
         NumeditParam(obj, 'R__alternate', 2, x+33, y, 'labelfraction', 0.25);
         gui_position('set_width', 133);
-        NumeditParam(obj, 'A__alternate', 1, x+66, y, 'labelfraction', 0.75);
+        NumeditParam(obj, 'A__alternate', 1, x+67, y, 'labelfraction', 0.75);
          next_row(y, 1);
         gui_position('reset_width')
 
@@ -198,14 +198,13 @@ switch action
                     altSeq (end+1:end+A__alternate(:)) = 'a';
                 end
                 end
-              
-                altSeq
-                var=(length(hit_history))-floor(length(hit_history)/length(altSeq))*length(altSeq)
+                
+                var=(length(hit_history))-floor(length(hit_history)/length(altSeq))*length(altSeq);
                 if var == 0 
-                    var = length(altSeq)
+                   var = length(altSeq);
                 end
-                next_side = altSeq(var)
-                next_side = char(next_side)
+                next_side = altSeq(var);
+                next_side = char(next_side);
                
             case 'alternate'
                 atmc = value(AutoTrainMinCorrect);

@@ -23,7 +23,7 @@ switch action
         next_row(y);
         MenuParam(obj, 'RestartPreAnsOnLick', {'on','off'},'off', x, y);      
         next_row(y);          
-        MenuParam(obj, 'BeepOn', {'all_wrong','abs_wrong','l-r_wrong','off'},'abs_wrong', x, y);      
+        MenuParam(obj, 'BeepOn', {'all_wrong','abs_wrong','l-r_wrong','off','wrong_only_l-r', 'wrong_only_all'},'abs_wrong', x, y);      
         next_row(y);          
         EditParam(obj, 'PreAnswerTime', '.5', x, y, 'TooltipString', ...
             'Time animal waits after pole is retracted but before answer counts');

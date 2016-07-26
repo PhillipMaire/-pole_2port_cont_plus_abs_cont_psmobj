@@ -380,12 +380,12 @@ switch action
                 eto_t = eto_t - puff_t;
                 eto_t = max(eto_t,.01);
              
+                 restartOnAllLicks = 1;
                 if strcmp(BeepOn, 'all_wrong')
                     LRset  = 53;% 53 is the sound cue
-                    ABSset = 53;% 46 is punish -psm
-                    
+                    ABSset = 53;
                 elseif strcmp(BeepOn, 'abs_wrong')
-                    LRset  = 46;
+                    LRset  = 46;% 46 is punish -psm
                     ABSset = 53;
                 elseif strcmp(BeepOn, 'l-r_wrong')
                     LRset  = 53;
@@ -393,20 +393,35 @@ switch action
                 elseif strcmp(BeepOn, 'off')
                     LRset  = 46;
                     ABSset = 46;
+                elseif strcmp(BeepOn, 'wrong_only_l-r')
+                    LRset  = 53;
+                    ABSset = 46;
+                    restartOnAllLicks = 0;
+                elseif strcmp(BeepOn, 'wrong_only_all')
+                    LRset  = 53;% 53 is the sound cue
+                    ABSset = 53;
+                    restartOnAllLicks = 0;
                 end
-                    
+
                 if next_side=='r'; % 'r' means right trial.
                     onlickL = LRset; % incorrect
+                    onLickLP = 53; 
+                    onLickRP = 46;%stay on punish dont restart
                     onlickR = sRwR; % correct
                     water_t = RWaterValveTime; % Defined in ValvesSection.m.
                     restartState = LRset;
                 elseif next_side=='l'; %left
-                    onlickR = LRset; % punish
-                    onlickL = sRwL; % water to left port
-                    water_t = LWaterValveTime; % Defined in ValvesSection.m.
+                    onlickR  = LRset; % punish
+                    onLickLP = 46; %stay on punish dont restart
+                    onLickRP = 53; %make beep do restart. these depend on the 
+                    %correct BeepOn settings being set
+                    onlickL  = sRwL; % water to left port
+                    water_t  = LWaterValveTime; % Defined in ValvesSection.m.
                     restartState = LRset; 
                 else next_side=='a'; %for absent condition -psm
                     onlickL = ABSset; % 53 for sound cue dependent on absent trial
+                    onLickLP = 53; 
+                    onLickRP = 53;
                     onlickR = ABSset;
                     water_t = 0.01;
                     restartState = ABSset; 
@@ -437,34 +452,37 @@ switch action
                     error('L or R port id not 46 or 47 or 48 or 53 check make and upload state matrix')
                 end
 
-
                 % Restart PreAnswer Period due to lick?
-                if (strcmp(RestartPreAnsOnLick,'on'))
-                    onLickP = sRDel;
+                    %if onLickLP/onLickRP set earlier dont set now 
+                    %restartOnAllLicks determines this. -psm
+                if (strcmp(RestartPreAnsOnLick,'on')) && restartOnAllLicks
+                    onLickLP = sRDel;
+                    onLickRP = sRDel;
                 elseif (strcmp(RestartPreAnsOnLick,'off'))
-                    onLickP = sPun;
+                    onLickLP = sPun;
+                    onLickRP = sPun;
                 end
 
-                stm = [stm ;
+               stm = [stm ;
                     %LinSt   LoutSt   RinSt    RoutSt   TimeupSt       Time      Dou      Aou  (Dou is bitmask format)
                     % line b (sBC = b)
-                    sBC      sBC      sBC      sBC      101            .01         etid              0; ... %40 send bitcode
-                    sPrTP    sPrTP    sPrTP    sPrTP    sPMS           prep_t      0                 0; ... %41 pretrial pause %Possibly sPMS -> sAns
-                    onLickS  onLickS  onLickS  onLickS  54             pr_t+sp_t   pvid              0; ... %42 Preanswer Pause
-                    onlickL  onlickL  onlickR  onlickR  sLoMi          ap_t        pvid              0; ... %43 Check if correct lick
-                    sLoMi    sLoMi    sLoMi    sLoMi    sPoTP          0.001       0                 0; ... %44 log miss/ignore
-                    sPoTP    sPoTP    sPoTP    sPoTP    35             postp_t     0                 0; ... %45 posttrial pause
-                    onLickP  onLickP  onLickP  onLickP  pps            eto_t       pvid              0; ... %46 punish
-                    sRwL     sRwL     sRwL     sRwL     sRCol          water_t     pvid+wvLid        0; ... %47 reward left
-                    sRwR     sRwR     sRwR     sRwR     sRCol          water_t     pvid+wvRid        0; ... %48 reward right
-                    sRCaT    sRCaT    sRCaT    sRCaT    sPoTP          0.001       pvid              0; ... %49 to log unrewarded correct trials
-                    sRCol    sRCol    sRCol    sRCol    sPoTP          rcoll_t     pvid              0; ... %50 give animal time to collect reward
-                    sRDel    sRDel    sRDel    sRDel    restartState   0.001       pvid              0; ... %51 restart delay
-                    52       52       52       52       sRCol          water_t     pvid+rewVid       0; ... %52 reward correct port
-                    53       53       53       53       sPun           0.005       pvid+sSound1      0; ... %53 lick on incorrect sound
-                    54       54       54       54       sPrAP          0.005       pvid+sSound2      0; ... %54 answer period sound cue
-                    
+                    sBC       sBC       sBC       sBC       101            .01         etid              0; ... %40 send bitcode
+                    sPrTP     sPrTP     sPrTP     sPrTP     sPMS           prep_t      0                 0; ... %41 pretrial pause %Possibly sPMS -> sAns
+                    onLickS   onLickS   onLickS   onLickS   54             pr_t+sp_t   pvid              0; ... %42 Preanswer Pause
+                    onlickL   onlickL   onlickR   onlickR   sLoMi          ap_t        pvid              0; ... %43 Check if correct lick
+                    sLoMi     sLoMi     sLoMi     sLoMi     sPoTP          0.001       0                 0; ... %44 log miss/ignore
+                    sPoTP     sPoTP     sPoTP     sPoTP     35             postp_t     0                 0; ... %45 posttrial pause
+                    onLickLP  onLickLP  onLickRP  onLickRP  pps            eto_t       pvid              0; ... %46 punish
+                    sRwL      sRwL      sRwL      sRwL      sRCol          water_t     pvid+wvLid        0; ... %47 reward left
+                    sRwR      sRwR      sRwR      sRwR      sRCol          water_t     pvid+wvRid        0; ... %48 reward right
+                    sRCaT     sRCaT     sRCaT     sRCaT     sPoTP          0.001       pvid              0; ... %49 to log unrewarded correct trials
+                    sRCol     sRCol     sRCol     sRCol     sPoTP          rcoll_t     pvid              0; ... %50 give animal time to collect reward
+                    sRDel     sRDel     sRDel     sRDel     restartState   0.001       pvid              0; ... %51 restart delay
+                    52        52        52        52        sRCol          water_t     pvid+rewVid       0; ... %52 reward correct port
+                    53        53        53        53        sPun           0.005       pvid+sSound1      0; ... %53 lick on incorrect sound
+                    54        54        54        54        sPrAP          0.005       pvid+sSound2      0; ... %54 answer period sound cue
                     ];
+
 
                 trialnum = n_done_trials + 1;
 
