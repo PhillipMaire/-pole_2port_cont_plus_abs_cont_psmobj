@@ -98,15 +98,22 @@ switch action
         % Prob of choosing left as correct side
         %       NumeditParam(obj, 'AbsentProb', 0.2, x, y);
         %       next_row(y, 1);
+        
+        
         NumeditParam(obj, 'LeftPortProb', 0.4, x, y);
         next_row(y, 1);
         NumeditParam(obj, 'RightPortProb', 0.4, x, y);
         next_row(y, 1);
         
-        
-        
+        gui_position('set_width', 60);
+        NumeditParam(obj, 'MIN_prob_trainer', 0, x,    y, 'labelfraction', 0.35);
+        gui_position('set_width', 140);
+        NumeditParam(obj, 'MAX_prob_trainer', 1, x+60, y, 'labelfraction', 0.71428);
+        next_row(y, 1);
+        gui_position('reset_width')
+
         gui_position('set_width', 33);
-        NumeditParam(obj, 'L__alternate', 2, x, y, 'labelfraction', 0.25);
+        NumeditParam(obj, 'L__alternate', 2, x,    y, 'labelfraction', 0.25);
         NumeditParam(obj, 'R__alternate', 2, x+33, y, 'labelfraction', 0.25);
         gui_position('set_width', 133);
         NumeditParam(obj, 'A__alternate', 1, x+67, y, 'labelfraction', 0.75);
@@ -592,20 +599,30 @@ switch action
                         if rpp == 1
                             rpp   = .9999;
                             lpp   = .00005;
-                            absps = .00005;
+                            absp  = .00005;
                         end
 
                         if lpp == 1
                             rpp   = .00005;
                             lpp   = .9999;
-                            absps = .00005;
+                            absp  = .00005;
                         end
 
                         if absp == 1
                             rpp   = .00005;
                             lpp   = .00005;
-                            absps = .9999;
+                            absp  = .9999;
                         end
+                        
+%                         MIN_prob = str2num(MIN_prob_trainer);
+%                         MAX_prob = str2num(MAX_prob_trainer);
+%                         
+%                         probMat = [rpp, lpp, absp];
+%                         
+%                         if MIN_prob>.33
+%                             warning('Min_prob set too high!! not using it')
+%                         elseif rpp<MIN_prob || lpp<MIN_prob || absp<MIN_prob
+%                             probMat<
                         %%%%%
 
                         disp(['Using left probabiliy:   ' num2str(lpp)]);
@@ -729,6 +746,46 @@ switch action
                             TWOpp = TWOpp + .0001;
                         end
                         %%%%%
+                       
+                        
+                        MIN_prob = MIN_prob_trainer(:);
+                        MAX_prob = MAX_prob_trainer(:);
+                        
+                        probMatTwo      = [ONEpp, TWOpp];
+                        probMatTwoLow   = probMatTwo < MIN_prob;
+                        probMatTwoHigh  = probMatTwo > MAX_prob;
+                        if     MIN_prob+MAX_prob ~= 1 
+                            warning(' MIN + MAX must be equal to 1! not using min or max')
+                        elseif MIN_prob>.5
+                            warning('Min_prob set too high!! not using it')
+                        elseif probMatTwoLow(1) || probMatTwoLow(2)
+                            if find(probMatTwoLow) == 1
+                                ONEpp = MIN_prob;
+                            else % == 2
+                                TWOpp = MIN_prob;
+                            end
+                        end
+                        
+                        if     MIN_prob+MAX_prob ~=1 
+                            warning(' MIN + MAX must be equal to 1! not using min or max')
+                        elseif MAX_prob<.5
+                            warning('MAX_prob set too low!! not using it')
+                        elseif probMatTwoHigh(1) || probMatTwoHigh(2)
+                            if find(probMatTwoHigh) == 1
+                                ONEpp = MAX_prob;
+                            else % == 2
+                                TWOpp = MAX_prob;
+                            end
+                        end
+                        
+                        if TWOpp + ONEpp ~= 1
+                            for i=1:10
+                            warning('change code prob not equal to 1 !!!!!')
+                            pause(5)
+                            i = i + 1;
+                            end
+                        end
+                            
                         if     condition == 1
                             absp = ONEpp;
                             rpp  = TWOpp;
